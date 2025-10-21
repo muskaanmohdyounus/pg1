@@ -1,0 +1,290 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Expense Tracker</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            margin: 30px; 
+            background: #f9f9f9; 
+        }
+
+        .topbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .topbar h1 { margin: 0; color: #4b4b4b; }
+
+        .logout {
+            background-color: #d9534f;
+            color: white;
+            padding: 5px 10px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .logout:hover { background-color: #c12e2a; }
+
+        a.button {
+            background-color: #5cb85c;
+            color: white;
+            padding: 8px 12px;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            display: inline-block;
+        }
+
+        a.edit { background-color: #0275d8; color: white; padding: 4px 8px; text-decoration: none; border-radius: 4px; }
+        a.delete { background-color: #d9534f; color: white; padding: 4px 8px; text-decoration: none; border-radius: 4px; }
+        a.edit:hover { background-color: #025aa5; }
+        a.delete:hover { background-color: #c12e2a; }
+
+        table { 
+            border-collapse: collapse; 
+            width: 100%; 
+            margin-top: 20px; 
+            background: #fff; 
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1); 
+        }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background-color: #f2f2f2; }
+
+        /* Search and Filter Styling */
+        .search-container {
+            margin-top: 15px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .filter-form {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            background: #ffffff;
+            padding: 10px 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .filter-form input[type="text"],
+        .filter-form input[type="date"] {
+            padding: 6px 8px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+        }
+
+        .filter-form label {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .filter-form button {
+            padding: 6px 12px;
+            background-color: #0275d8;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+        .filter-form button:hover {
+            background-color: #025aa5;
+        }
+
+        .clear-btn {
+            text-decoration: none;
+            color: #0275d8;
+            padding: 6px 12px;
+            border: 1px solid #0275d8;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .clear-btn:hover {
+            background-color: #0275d8;
+            color: white;
+        }
+
+        .chart-container {
+            text-align: center;
+            margin-top: 40px;
+            background: #fff;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        canvas { 
+            display: block; 
+            margin: 0 auto; 
+            max-width: 700px; 
+            max-height: 500px; 
+        }
+
+        h3 {
+            text-align: center; 
+            color: #333; 
+            margin-bottom: 20px;
+        }
+
+        .total-expense {
+            text-align: center;
+            font-size: 18px;
+            font-weight: bold;
+            color: #4b4b4b;
+            margin-top: 20px;
+        }
+
+    </style>
+
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+    <!-- Top Bar -->
+    <div class="topbar">
+        <h1>Expense Tracker</h1>
+        <div>
+            {% if user.is_authenticated %}
+                <span>Welcome, <strong>{{ user.username }}</strong></span>
+                <form method="POST" action="{% url 'logout' %}" style="display:inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="logout">Logout</button>
+                </form>
+            {% else %}
+                <a href="{% url 'index' %}">Login</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Add Expense Button -->
+    {% if user.is_authenticated %}
+        <a class="button" href="{% url 'add_expense' %}">Add New Expense</a>
+    {% endif %}
+
+    <!-- Search + Date Filter -->
+    <div class="search-container">
+        <form method="GET" action="{% url 'expense_list' %}" class="filter-form">
+            <input type="text" name="q" id="category-search" list="categories" placeholder="Search by category..." value="{{ query|default:'' }}">
+            <datalist id="categories">
+                <option value="Rent">
+                <option value="Electricity">
+                <option value="Groceries">
+                <option value="Maintenance">
+                <option value="Salary">
+                <option value="Miscellaneous">
+            </datalist>
+
+            <label for="start_date">From:</label>
+            <input type="date" id="start_date" name="start_date" value="{{ start_date|default:'' }}">
+
+            <label for="end_date">To:</label>
+            <input type="date" id="end_date" name="end_date" value="{{ end_date|default:'' }}">
+
+            <button type="submit">Search / Apply</button>
+            {% if query or start_date or end_date %}
+                <a href="{% url 'expense_list' %}" class="clear-btn">Clear</a>
+            {% endif %}
+        </form>
+    </div>
+
+    
+    <table>
+        <tr>
+            <th>Title</th>
+            <th>Amount</th>
+            <th>Category</th>
+            <th>Date</th>
+            <th>Description</th>
+            <th>Action</th>
+        </tr>
+
+        {% for expense in expenses %}
+        <tr>
+            <td>{{ expense.title }}</td>
+            <td>{{ expense.amount }}</td>
+            <td>{{ expense.category }}</td>
+            <td>{{ expense.date }}</td>
+            <td>{{ expense.description }}</td>
+            <td>
+                <a class="edit" href="{% url 'edit_expense' expense.id %}">Edit</a>
+                <a class="delete" href="{% url 'delete_expense' expense.id %}">Delete</a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr><td colspan="6">No expenses found.</td></tr>
+        {% endfor %}
+    </table>
+
+    <div class="chart-container">
+        <h3>Expenses by Category</h3>
+        <canvas id="categoryChart"></canvas>
+        {{ category_totals|json_script:"category-data" }}
+    </div>
+
+    <div class="total-expense">Total Expense: ₹{{ total }}</div>
+
+    <script>
+        const categoryData = JSON.parse(document.getElementById('category-data').textContent);
+        const labels = categoryData.map(item => item.category);
+        const data = categoryData.map(item => item.total_amount);
+
+        const ctx = document.getElementById('categoryChart').getContext('2d');
+
+        const backgroundColors = [
+            'rgba(246, 191, 91, 0.8)',
+            'rgba(150, 210, 184, 0.8)',
+            'rgba(246, 133, 133, 0.8)',
+            'rgba(178, 145, 255, 0.8)',
+            'rgba(255, 213, 160, 0.8)',
+            'rgba(131, 196, 241, 0.8)'
+        ];
+
+        const borderColors = backgroundColors.map(color => color.replace('0.8','1'));
+
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: data,
+                    backgroundColor: backgroundColors,
+                    borderColor: borderColors,
+                    borderWidth: 2
+                }]
+            },
+            options: {
+                responsive: false,
+                plugins: {
+                    legend: { 
+                        position: 'right', 
+                        labels: { 
+                            boxWidth: 20, 
+                            padding: 15,
+                            font: { size: 14, weight: 'bold' }
+                        } 
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.label}: ₹${context.raw}`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+
+</body>
+</html>

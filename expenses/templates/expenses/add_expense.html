@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Add Expense - Puzzle Living PG</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            background-color: #ffffff;
+            padding: 30px 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            width: 90%; /* take most of the page width */
+            max-width: 800px; /* but not too wide on large screens */
+            margin: 50px auto; /* top spacing + center horizontally */
+        }
+
+        h1 {
+            color: #333333;
+            margin-bottom: 25px;
+            font-size: 24px;
+            font-weight: 600;
+            text-align: left;
+        }
+
+        form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        label {
+            font-size: 14px;
+            color: #555555;
+            font-weight: 500;
+        }
+
+        input, select, textarea {
+            padding: 12px;
+            border: 1px solid #cccccc;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #333333;
+            width: 100%;
+            transition: border-color 0.2s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            border-color: #888888;
+            outline: none;
+        }
+
+        button {
+            padding: 14px;
+            background-color: #5a4b3b;
+            color: #ffffff;
+            border: none;
+            border-radius: 6px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: #44382b;
+        }
+
+        .back-link {
+            display: inline-block;
+            margin-top: 20px;
+            text-decoration: none;
+            color: #5a4b3b;
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .back-link:hover {
+            color: #44382b;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Add New Expense</h1>
+        <form method="POST">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Save Expense</button>
+        </form>
+        <a class="back-link" href="{% url 'expense_list' %}">← Back to Expense List</a>
+    </div>
+</body>
+</html>
