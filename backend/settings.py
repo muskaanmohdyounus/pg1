@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -77,11 +78,10 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'expensesapp',       # e.g. expense_tracker
-        'USER': 'root',                     # your MySQL username
-        'PASSWORD': 'Musk@123',        # your MySQL password
-        'HOST': 'localhost',                # or 127.0.0.1
-        'PORT': '3306',                     # default MySQL port
-        
+        'USER': 'root',                     
+        'PASSWORD': 'Musk@123',        
+        'HOST': 'localhost',                
+        'PORT': '3306',                     
     }
 }
 
@@ -117,15 +117,23 @@ USE_I18N = True
 USE_TZ = True
 
 
-# Static files (CSS, JavaScript, Images)
+# ✅ Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+
+STATICFILES_DIRS = [
+    BASE_DIR /"static",
+]
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-import os
+# ✅ Added template directory
 TEMPLATES[0]['DIRS'] = [os.path.join(BASE_DIR, 'templates')]
+
+# ✅ Media setup
+MEDIA_URL = '/media/'
+MEDIA_ROOT = BASE_DIR / 'media'

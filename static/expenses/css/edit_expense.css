@@ -1,0 +1,130 @@
+body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f8f9fa;
+      min-height: 100vh;
+    }
+
+ .navbar {
+      background-color: #dc3545;
+    }
+
+.navbar-brand {
+      font-weight: 600;
+      color: #fff;
+      letter-spacing: 0.6px;
+    }
+
+.container-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 60px 20px;
+    }
+
+.edit-card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.08);
+      padding: 35px;
+      width: 100%;
+      max-width: 650px;
+      border-top: 5px solid #dc3545;
+    }
+
+.edit-card h3 {
+      font-weight: 600;
+      color: #212529;
+      margin-bottom: 25px;
+      text-align: center;
+      letter-spacing: 0.3px;
+    }
+
+label.form-label {
+      font-weight: 500;
+      color: #333;
+    }
+
+input, select, textarea {
+      border-radius: 8px ;
+      border: 1px solid #dee2e6 ;
+      padding: 10px ;
+      font-size: 15px;
+    }
+
+input:focus, select:focus, textarea:focus {
+      border-color: #dc3545 ;
+      box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+    }
+
+.bill-preview {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      background-color: #f9f9f9;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px dashed #ccc;
+      margin-top: 10px;
+    }
+
+.bill-preview img {
+      max-height: 200px;
+      border-radius: 8px;
+    }
+
+.btn-danger {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 16px;
+      transition: 0.3s ease;
+    }
+
+.btn-danger:hover {
+      background-color: #bb2d3b;
+    }
+
+.cancel-link {
+      display: inline-block;
+      margin-top: 15px;
+      text-align: center;
+      color: #6c757d;
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+.cancel-link:hover {
+      color: #000;
+      text-decoration: underline;
+    }
+
+.form-section {
+      background: #fff;
+      padding: 25px;
+      border-radius: 12px;
+    }
+
+.form-section:not(:last-child) {
+      margin-bottom: 20px;
+    }
+
+.form-title {
+      font-weight: 600;
+      font-size: 17px;
+      color: #dc3545;
+      border-left: 4px solid #dc3545;
+      padding-left: 10px;
+      margin-bottom: 15px;
+    }
+
+.form-row {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+.form-row .form-group {
+      flex: 1;
+      min-width: 200px;
+    }

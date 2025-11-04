@@ -1,0 +1,204 @@
+/* ✅ Global Reset */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ✅ Main Body */
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f9fafb;
+  margin: 0;
+  padding: 0;
+}
+
+/* ✅ Content (to avoid sidebar overlap) */
+.content {
+  margin-left: 300px; /* must match sidebar width */
+  padding: 40px;
+  flex-grow: 1;
+  min-height: 100vh;
+  box-sizing: border-box;
+  background-color: #f9fafb;
+}
+
+h2 {
+  color: #181818;
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 25px;
+}
+
+/* ✅ Report Card Design */
+.report-card {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 25px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.report-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.report-card h3 {
+  color: #ef4444;
+  font-size: 22px;
+  margin-bottom: 15px;
+}
+
+/* ✅ Report Details Layout */
+.report-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  color: #374151;
+}
+
+.detail-item {
+  background: #f9fafb;
+  border-radius: 8px;
+  padding: 10px 15px;
+  flex: 1 1 200px;
+  box-shadow: inset 0 0 4px rgba(0,0,0,0.05);
+}
+
+.detail-item strong {
+  display: block;
+  color: #111827;
+  font-size: 15px;
+  margin-bottom: 4px;
+}
+
+.no-report {
+  color: #6b7280;
+  font-size: 16px;
+  margin-top: 10px;
+}
+
+/* ✅ FINAL STRICT FIX – LOGO + LOGOUT FIT INSIDE 90px */
+@media (max-width: 600px) {
+
+  /* ✅ Slim sidebar stays */
+  .sidebar {
+    width: 90px !important;
+    padding: 12px 5px !important;
+    overflow: hidden !important; /* stops ANYTHING from spilling out */
+  }
+
+  /* ✅ HARD FIX: force logo wrapper inside */
+  .logo-wrapper {
+    width: 100% !important;
+    padding: 5px 0 !important;
+    margin: 0 !important;
+    border-radius: 8px !important;
+    overflow: hidden !important;     /* ✅ stops overflow */
+    display: flex !important;
+    justify-content: center !important;
+    align-items: center !important;
+  }
+
+  .logo-container {
+    width: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: center !important;
+    gap: 2px !important;             /* ✅ no extra spacing */
+    overflow: hidden !important;
+  }
+
+  .logo-container img {
+    width: 36px !important;
+    height: 36px !important;
+    object-fit: contain !important;
+    display: block !important;
+  }
+
+  .logo-container h2 {
+    font-size: 10px !important;
+    text-align: center !important;
+    width: 100% !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    line-height: 1 !important;
+    margin: 0 !important;
+  }
+
+  /* ✅ Hide menu text (icon-only) */
+  .sidebar a {
+    font-size: 0 !important;
+    justify-content: center !important;
+    padding: 10px !important;
+  }
+
+  .sidebar a i {
+    font-size: 18px !important;
+  }
+
+  /* ✅ HARD FIX LOGOUT */
+  .logout-container {
+    width: 100% !important;
+    padding: 0 !important;
+    margin-top: auto !important;
+    display: flex !important;
+    justify-content: center !important;
+  }
+
+  .logout {
+    width: 100% !important;
+    padding: 10px !important;
+    font-size: 12px !important;
+    border-radius: 8px !important;
+    text-align: center !important;
+    overflow: hidden !important;
+  }
+
+  /* ✅ Content stays correct */
+  .content,
+  .main,
+  .main-content {
+    margin-left: 90px !important;
+    padding: 15px !important;
+  }
+}
+/* ✅ FIX SIDEBAR LOGO OVERFLOW ON REPORTS PAGE ONLY */
+@media (max-width: 600px) {
+
+  /* ✅ Force logo-box to fit 90px width perfectly */
+  .sidebar .logo-box {
+    width: 100% !important;
+    padding: 6px 0 !important;
+    margin: 0 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: center !important;
+    overflow: hidden !important;
+    border-radius: 10px !important;
+  }
+
+  /* ✅ Fix logo image inside slim sidebar */
+  .sidebar .logo-img {
+    width: 38px !important;
+    height: 38px !important;
+    object-fit: contain !important;
+  }
+
+  /* ✅ Fix logo text so it doesn't come out */
+  .sidebar .logo-text {
+    font-size: 10px !important;
+    text-align: center !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    line-height: 1.1 !important;
+    width: 100% !important;
+    margin-top: 3px !important;
+  }
+}

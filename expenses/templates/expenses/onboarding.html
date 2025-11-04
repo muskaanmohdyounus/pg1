@@ -1,0 +1,28 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manager Onboarding</title>
+
+    <!-- Link CSS -->
+     <link rel="stylesheet" href="{% static 'expenses/css/onboarding.css' %}">
+</head>
+<body>
+
+<div class="onboard-box">
+    <div class="step-count">Question {{ step }} of 5</div>
+    <h2>Manager Onboarding</h2>
+    <p class="question">{{ question }}</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <input type="text" name="answer" placeholder="Type your answer here..." required class="input-box">
+        <button type="submit">Next ➜</button>
+    </form>
+</div>
+
+</body>
+</html>
