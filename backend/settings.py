@@ -74,16 +74,15 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+import dj_database_url
+import os
+
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'expensesapp',       # e.g. expense_tracker
-        'USER': 'root',                     
-        'PASSWORD': 'Musk@123',        
-        'HOST': 'localhost',                
-        'PORT': '3306',                     
-    }
+    'default': dj_database_url.parse(
+        os.environ.get("DATABASE_URL")
+    )
 }
+
 
 
 # Password validation
