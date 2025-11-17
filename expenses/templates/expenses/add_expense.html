@@ -20,16 +20,12 @@
 
   <!-- Sidebar CSS -->
   <link rel="stylesheet" href="{% static 'expenses/css/sidebar.css' %}">
-<link rel="stylesheet" href="{% static 'expenses/css/add_expense.css' %}?v=10">
-
-
+  <link rel="stylesheet" href="{% static 'expenses/css/add_expense.css' %}?v=11">
 </head>
 
 <body>
-  <!-- ✅ Sidebar Include -->
   {% include 'expenses/sidebar.html' %}
 
-  <!-- ✅ Main Content -->
   <div class="main-content">
     <div class="add-card">
       <h3><i class="bi bi-plus-circle me-2 text-danger"></i>Add New Expense</h3>
@@ -37,14 +33,40 @@
       <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
 
-        <!-- 🧾 Expense Details -->
+        <!-- 🏠 Property Selection -->
+        <div class="form-group mb-3">
+          <label class="form-label">Property</label>
+          <select name="property" class="form-control" required>
+            <option value="">-- Select Property --</option>
+            {% for prop in properties %}
+              <option value="{{ prop.id }}">{{ prop.name }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- 🧾 Category Selection -->
         <div class="form-section">
-          <div class="form-title">Expense Details</div>
+          <div class="form-title">Expense Category</div>
 
           <div class="form-row">
+            <!-- Main Category -->
             <div class="form-group mb-3">
-              <label class="form-label">Title</label>
-              <input type="text" name="title" class="form-control" placeholder="Enter expense title" required>
+              <label class="form-label">Category</label>
+              <select name="category" id="mainCategory" class="form-control" required>
+                <option value="">-- Select Category --</option>
+                <option value="Food">Food</option>
+                <option value="Utilities">Utilities</option>
+                <option value="Staff">Staff</option>
+                <option value="Vendors">Vendors</option>
+                <option value="__new__">+ Add New Category</option>
+              </select>
+              <input type="text" name="new_category" id="newCategoryInput" class="form-control mt-2" placeholder="Enter new category" style="display:none;">
+            </div>
+
+            <!-- Sub Category (now free text) -->
+            <div class="form-group mb-3">
+              <label class="form-label">Sub-Category</label>
+              <input type="text" name="sub_category" id="subCategory" class="form-control" placeholder="Enter sub-category manually" required>
             </div>
 
             <div class="form-group mb-3">
@@ -53,24 +75,9 @@
             </div>
           </div>
 
-          <div class="form-row">
-            <div class="form-group mb-3">
-              <label class="form-label">Category</label>
-              <select name="category" class="form-control" required>
-                <option value="">-- Select Category --</option>
-                <option value="Rent">Rent</option>
-                <option value="Electricity">Electricity</option>
-                <option value="Groceries">Groceries</option>
-                <option value="Maintenance">Maintenance</option>
-                <option value="Salary">Salary</option>
-                <option value="Misc">Miscellaneous</option>
-              </select>
-            </div>
-
-            <div class="form-group mb-3">
-              <label class="form-label">Date</label>
-              <input type="date" name="date" class="form-control" required>
-            </div>
+          <div class="mb-3">
+            <label class="form-label">Date</label>
+            <input type="date" name="entry_date" class="form-control" required>
           </div>
 
           <div class="mb-3">
@@ -78,6 +85,37 @@
             <textarea name="description" class="form-control" rows="3" placeholder="Enter a short description..."></textarea>
           </div>
         </div>
+        <!-- 🧾 Paid Details -->
+<div class="form-section">
+  <div class="form-title">Payment Details</div>
+
+  <div class="form-row">
+    <!-- Paid By -->
+    <div class="form-group mb-3">
+      <label class="form-label">Paid By</label>
+      <input type="text" name="paid_by" class="form-control" placeholder="Enter payer name" required>
+    </div>
+
+    <!-- Paid To -->
+    <div class="form-group mb-3">
+      <label class="form-label">Paid To</label>
+      <input type="text" name="paid_to" class="form-control" placeholder="Enter payee name" required>
+    </div>
+
+    <!-- Payment Mode -->
+    <div class="form-group mb-3">
+      <label class="form-label">Payment Mode</label>
+      <select name="paid_mode" class="form-control" required>
+        <option value="Cash">Cash</option>
+        <option value="Card">Card</option>
+        <option value="UPI">UPI</option>
+        <option value="Bank Transfer">Bank Transfer</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+  </div>
+</div>
+
 
         <!-- 🧾 Bill Upload -->
         <div class="form-section">
@@ -91,12 +129,29 @@
           <i class="bi bi-plus-circle me-1"></i> Add Expense
         </button>
 
-        <a href="{% url 'expense_list' %}" class="cancel-link d-block">Cancel</a>
+        <a href="{% url 'expense_list' %}" class="cancel-link d-block mt-2">Cancel</a>
       </form>
     </div>
   </div>
 
   <!-- Bootstrap JS -->
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- Category JS -->
+  <script>
+    const mainCategory = document.getElementById('mainCategory');
+    const newCategoryInput = document.getElementById('newCategoryInput');
+
+    mainCategory.addEventListener('change', function() {
+      const value = this.value;
+      if(value === '__new__') {
+        newCategoryInput.style.display = 'block';
+        newCategoryInput.required = true;
+      } else {
+        newCategoryInput.style.display = 'none';
+        newCategoryInput.required = false;
+      }
+    });
+  </script>
 </body>
 </html>

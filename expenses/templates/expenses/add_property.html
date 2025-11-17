@@ -1,0 +1,122 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add Property</title>
+
+    <!-- Bootstrap -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'expenses/css/add_property.css' %}">
+</head>
+
+<body>
+
+<div class="container py-4">
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3 class="fw-bold">➕ Add New Property</h3>
+        <a href="{% url 'property_list' %}" class="btn btn-secondary">
+            ← Back to List
+        </a>
+    </div>
+
+    <!-- FORM CARD -->
+    <div class="card shadow-sm p-4 add-form-card">
+
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <!-- Show Django validation errors -->
+            {% if form.errors %}
+                <div class="alert alert-danger">
+                    Please correct the errors below.
+                </div>
+            {% endif %}
+
+            <div class="row g-3">
+
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Property Name</label>
+                    {{ form.name }}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Property Type</label>
+                    {{ form.type }}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Tenant Type</label>
+                    {{ form.tenant_type }}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Status</label>
+                    {{ form.status }}
+                </div>
+
+                <div class="col-md-12">
+                    <label class="form-label fw-semibold">Full Address</label>
+                    {{ form.address }}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">City / Area</label>
+                    {{ form.city }}
+                </div>
+
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">Contact (Phone or Email)</label>
+                    {{ form.contact }}
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Total Beds</label>
+                    {{ form.total_beds }}
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Occupied Beds</label>
+                    {{ form.occupied_beds }}
+                </div>
+
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">Rent per Bed</label>
+                    {{ form.rent_per_bed }}
+                </div>
+
+                <div class="col-md-12">
+                    <label class="form-label fw-semibold">Amenities / Notes</label>
+                    {{ form.amenities }}
+                </div>
+
+                <div class="col-12">
+                    <label class="form-label fw-semibold">Upload Images</label>
+                    <input type="file" name="images" multiple class="form-control" accept="image/*">
+                </div>
+
+            </div>
+
+        <div class="d-flex justify-content-end mt-4">
+    <button type="submit" class="btn btn-danger px-4">Save Property</button>
+</div>
+
+
+        </form>
+
+    </div>
+
+</div>
+
+</body>
+</html>

@@ -91,3 +91,64 @@
   margin-left: 260px !important;
   padding: 40px;
 }
+/* Hide the button by default */
+.menu-toggle {
+  display: none;
+  position: fixed;
+  top: 15px;
+  left: 15px;
+  background: #8b0000;
+  color: white;
+  border: none;
+  font-size: 26px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  z-index: 2000;
+}
+
+/* Show only on small screens */
+@media (max-width: 768px) {
+  .menu-toggle {
+    display: block;
+  }
+}
+/* ✅ Small floating dropdown for mobile */
+.mobile-menu {
+  display: none;
+  position: absolute;
+  top: 60px;
+  left: 15px;
+  background: #8b0000;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  padding: 10px;
+  z-index: 3000;
+  width: 220px;
+}
+
+.mobile-menu a {
+  display: block;
+  color: white;
+  text-decoration: none;
+  padding: 10px;
+  border-radius: 8px;
+  font-size: 15px;
+  background: rgba(255,255,255,0.1);
+  margin-bottom: 5px;
+}
+
+.mobile-menu a:hover {
+  background: rgba(255,255,255,0.2);
+}
+
+/* ✅ Show only on small screens */
+@media (max-width: 768px) {
+  .sidebar {
+    display: none;
+  }
+
+  .mobile-menu.show {
+    display: block;
+  }
+}

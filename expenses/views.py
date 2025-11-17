@@ -168,92 +168,180 @@ def onboarding_view(request):
 
 
 
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from django.db.models import Sum
+from .models import Expense
+
+from .models import Property
+
 @login_required
 def expense_list(request):
-    """Display and filter all expenses with total and chart data."""
     query = request.GET.get('q', '')
     start_date = request.GET.get('start_date', '')
     end_date = request.GET.get('end_date', '')
 
-    expenses = Expense.objects.all().order_by('-date')
+    expenses = Expense.objects.all().order_by('-entry_date')
 
-   
     if query:
-        expenses = expenses.filter(category__icontains=query)
+        expenses = expenses.filter(category__name__icontains=query)
     if start_date:
-        expenses = expenses.filter(date__gte=start_date)
+        expenses = expenses.filter(entry_date__gte=start_date)
     if end_date:
-        expenses = expenses.filter(date__lte=end_date)
+        expenses = expenses.filter(entry_date__lte=end_date)
 
-  
-    total = sum(exp.amount for exp in expenses)
+    total = expenses.aggregate(Sum('amount'))['amount__sum'] or 0
 
-    
-    category_totals = (
-        expenses.values('category')
-        .annotate(total_amount=Sum('amount'))
-        .order_by('-total_amount')
-    )
+    # Summary by category
+    summary_categories = ['Utility', 'Food', 'Staff', 'Miscellaneous']
+    category_summary = {}
+    for cat_name in summary_categories:
+        amt = expenses.filter(category__name__icontains=cat_name).aggregate(Sum('amount'))['amount__sum'] or 0
+        category_summary[cat_name] = amt
+
+    # Highest single expense
+    highest_expense = expenses.order_by('-amount').first()
+
+    # Category chart data
+    category_totals = expenses.values('category__name').annotate(total_amount=Sum('amount')).order_by('-total_amount')
+    chart_labels = [item['category__name'] or 'Uncategorized' for item in category_totals]
+    chart_values = [item['total_amount'] for item in category_totals]
+
+    # ✅ Fetch all properties for filter dropdown
+    properties = Property.objects.all()
 
     return render(request, 'expenses/expense_list.html', {
         'expenses': expenses,
         'total': total,
-        'query': query,
-        'start_date': start_date,
-        'end_date': end_date,
-        'category_totals_json': list(category_totals),
+        'category_summary': category_summary,
+        'highest_expense': highest_expense,
+        'chart_labels': chart_labels,
+        'chart_values': chart_values,
+        'properties': properties,  # <--- added
+    })
+
+@login_required
+def expense_detail(request, id):
+    expense = get_object_or_404(Expense, id=id)
+    return render(request, 'expenses/expense_detail.html', {
+        'expense': expense
     })
 
 
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from django.contrib.auth.decorators import user_passes_test
+from .models import Expense, Category, Property
 
-
-@user_passes_test(is_admin, login_url='index')
+# Use a lambda directly instead of missing is_admin
+@user_passes_test(lambda u: u.is_staff, login_url='index')
 def add_expense(request):
-    """Add a new expense record."""
-    if request.method == 'POST':
-        title = request.POST.get('title')
-        amount = request.POST.get('amount')
-        category = request.POST.get('category')
-        date = request.POST.get('date')
-        description = request.POST.get('description')
-        bill_image = request.FILES.get('bill_image')
+    categories = Category.objects.all()
+    properties = Property.objects.all()
 
-        
+    if request.method == "POST":
+        property_id = request.POST.get("property")
+        category_name = request.POST.get("category", "").strip()  # manual input
+        sub_category = request.POST.get("sub_category", "").strip()
+        amount = request.POST.get("amount")
+        entry_date = request.POST.get("entry_date")
+        description = request.POST.get("description", "").strip()
+        bill_image = request.FILES.get("bill_image")
+
+        # Validate required fields
+        if not property_id or not amount or not entry_date:
+            messages.error(request, "Please fill all required fields.")
+            return redirect("expenses:add")
+
+        # Get Property object safely
+        try:
+            prop = Property.objects.get(id=property_id)
+        except Property.DoesNotExist:
+            messages.error(request, "Invalid Property selected.")
+            return redirect("expenses:add")
+
+        # Get or create Category by name (manual input)
+        cat = None
+        if category_name:
+            cat, created = Category.objects.get_or_create(name=category_name)
+
+        # Create Expense
         Expense.objects.create(
-            title=title,
+            property=prop,
+            category=cat,
+            sub_category=sub_category,
             amount=amount,
-            category=category,
-            date=date,
+            entry_date=entry_date,
             description=description,
             bill_image=bill_image
         )
-        return redirect('expense_list')
 
-    return render(request, 'expenses/add_expense.html')
-
-
+        messages.success(request, "Expense added successfully!")
+        return redirect("expense_list")
 
 
-@user_passes_test(is_admin, login_url='index')
+    context = {
+        "categories": categories,
+        "properties": properties
+    }
+    return render(request, "expenses/add_expense.html", context)
+
+
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from .models import Expense, Property, Category
+
+@login_required
 def edit_expense(request, id):
     """Edit an existing expense record."""
     expense = get_object_or_404(Expense, id=id)
+    
+    categories = Category.objects.all()
+    properties = Property.objects.all()
 
     if request.method == 'POST':
-        expense.title = request.POST.get('title')
+        # Basic fields
         expense.amount = request.POST.get('amount')
-        expense.category = request.POST.get('category')
-        expense.date = request.POST.get('date')
         expense.description = request.POST.get('description')
+        expense.entry_date = request.POST.get('entry_date')
+        expense.sub_category = request.POST.get('sub_category', '')
 
-        # Update bill image only if new one is uploaded
+        # ForeignKeys
+        category_id = request.POST.get('category')
+        if category_id:
+            expense.category = Category.objects.get(id=category_id)
+        else:
+            expense.category = None
+
+        property_id = request.POST.get('property')
+        if property_id:
+            expense.property = Property.objects.get(id=property_id)
+        else:
+            expense.property = None
+
+        # Optional fields
+        expense.paid_by = request.POST.get('paid_by', '')
+        expense.paid_to = request.POST.get('paid_to', '')
+        paid_mode = request.POST.get('paid_mode')
+        if paid_mode in dict(Expense.PAYMENT_MODES).keys():
+            expense.paid_mode = paid_mode
+        else:
+            expense.paid_mode = 'Cash'  # default fallback
+
+        # Bill image (only update if new file uploaded)
         if request.FILES.get('bill_image'):
             expense.bill_image = request.FILES.get('bill_image')
 
         expense.save()
+        messages.success(request, "Expense updated successfully!")
         return redirect('expense_list')
 
-    return render(request, 'expenses/edit_expense.html', {'expense': expense})
+    return render(request, 'expenses/edit_expense.html', {
+        'expense': expense,
+        'categories': categories,
+        'properties': properties,
+    })
 
 
 
@@ -318,3 +406,123 @@ def send_otp(request):
     print("===================================")
 
     return JsonResponse({"status": "success", "message": "OTP sent"})
+
+
+
+from django.shortcuts import render, get_object_or_404, redirect
+from django.urls import reverse
+from .models import Property
+from .forms import PropertyForm
+from .models import PropertyImage
+
+
+
+# ✅ 1. PROPERTY LIST — shows all properties
+def property_list(request):
+    properties = Property.objects.all().order_by('-id')
+    return render(request, 'expenses/property_list.html', {
+        'properties': properties
+    })
+
+
+# ✅ 2. ADD NEW PROPERTY
+def add_property(request):
+    if request.method == 'POST':
+        form = PropertyForm(request.POST)
+        files = request.FILES.getlist('images')
+
+        if form.is_valid():
+            property_obj = form.save()
+
+            # Save uploaded images
+            for file in files:
+                PropertyImage.objects.create(property=property_obj, image=file)
+
+            return redirect('property_list')
+    else:
+        form = PropertyForm()
+
+    return render(request, 'expenses/add_property.html', {
+        'form': form
+    })
+
+
+
+# ✅ 3. PROPERTY DETAIL PAGE
+def property_detail(request, id):
+    property_obj = get_object_or_404(Property, id=id)
+    return render(request, 'expenses/property_detail.html', {
+        'property': property_obj
+    })
+
+
+# ✅ 4. EDIT PROPERTY
+def edit_property(request, id):
+    property_obj = get_object_or_404(Property, id=id)
+
+    if request.method == 'POST':
+        form = PropertyForm(request.POST, instance=property_obj)
+        files = request.FILES.getlist('images')
+
+        if form.is_valid():
+            form.save()
+
+            # Add new images
+            for file in files:
+                PropertyImage.objects.create(property=property_obj, image=file)
+
+            return redirect('property_detail', id=id)
+
+    else:
+        form = PropertyForm(instance=property_obj)
+
+    return render(request, 'expenses/edit_property.html', {
+        'form': form,
+        'property': property_obj,
+        'images': property_obj.images.all()
+    })
+
+
+
+# ✅ 5. DELETE PROPERTY
+def delete_property(request, id):
+    property_obj = get_object_or_404(Property, id=id)
+
+    if request.method == 'POST':
+        property_obj.delete()
+        return redirect('property_list')
+
+    return render(request, 'expenses/delete_confirm.html', {
+        'property': property_obj
+    })
+
+import json
+from collections import Counter
+from django.shortcuts import render
+from .models import Property
+
+def property_graph(request):
+    properties = Property.objects.all()
+
+    # Chart 1: Occupancy per property
+    property_names = [p.name for p in properties]
+    occupancy = [p.occupancy_percent for p in properties]
+
+    # Chart 2: Property type distribution
+    types = [p.type for p in properties]
+    type_counts = dict(Counter(types))
+
+    # Chart 3: Occupied vs Vacant beds
+    occupied_beds = [p.occupied_beds for p in properties]
+    vacant_beds = [p.vacant_beds for p in properties]
+
+    context = {
+        'property_names': json.dumps(property_names),
+        'occupancy': json.dumps(occupancy),
+        'type_labels': json.dumps(list(type_counts.keys())),
+        'type_counts': json.dumps(list(type_counts.values())),
+        'occupied_beds': json.dumps(occupied_beds),
+        'vacant_beds': json.dumps(vacant_beds),
+    }
+
+    return render(request, 'expenses/property_graph.html', context)

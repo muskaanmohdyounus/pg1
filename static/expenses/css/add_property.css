@@ -1,0 +1,129 @@
+/* Main body */
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: #f8f9fa;
+    min-height: 100vh;
+    display: flex;
+}
+
+/* Push main content to the right of sidebar */
+.main-content {
+    margin-left: 270px; /* same as sidebar width */
+    padding: 40px;
+    flex-grow: 1;
+}
+
+/* Form card */
+.add-card, .add-form-card {
+    background: #f2f3ef;
+    border-radius: 16px;
+    box-shadow: 0 6px 25px rgba(0, 0, 0, 0.08);
+    padding: 35px;
+    border-top: 5px solid #dc3545;
+    margin: auto;
+}
+
+/* Form title inside card */
+.add-card h3, .add-form-card h3 {
+    font-weight: 600;
+    color: #212529;
+    margin-bottom: 25px;
+    text-align: center;
+    letter-spacing: 0.3px;
+}
+
+/* Form labels */
+label.form-label {
+    font-weight: 500;
+    color: #333;
+}
+
+/* Inputs, selects, textareas */
+input, select, textarea, .form-control, .form-select {
+    border-radius: 8px !important;
+    border: 1px solid #dee2e6 !important;
+    padding: 10px !important;
+    font-size: 15px;
+    width: 100%;
+}
+
+/* Focus state */
+input:focus, select:focus, textarea:focus, .form-control:focus, .form-select:focus {
+    border-color: #dc3545 !important;
+    box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+}
+
+/* Form sections */
+.form-section {
+    background: #fff;
+    padding: 25px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+}
+
+/* Section title */
+.form-title {
+    font-weight: 600;
+    font-size: 17px;
+    color: #dc3545;
+    border-left: 4px solid #dc3545;
+    padding-left: 10px;
+    margin-bottom: 15px;
+}
+
+/* Rows inside sections */
+.form-row {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+/* Each form group in row */
+.form-row .form-group {
+    flex: 1;
+    min-width: 200px;
+}
+
+/* Buttons */
+.btn-danger, .btn-primary {
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 16px;
+    transition: 0.3s ease;
+}
+
+.btn-danger:hover, .btn-primary:hover {
+    background-color: #bb2d3b;
+}
+
+/* Cancel link */
+.cancel-link {
+    display: inline-block;
+    margin-top: 15px;
+    text-align: center;
+    color: #d51326;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.cancel-link:hover {
+    color: #000;
+    text-decoration: underline;
+}
+
+/* ✅ MOBILE FIXES (same as Add Expense) */
+@media (max-width: 768px) {
+    .main-content {
+        margin-left: 160px !important;
+        padding: 20px !important;
+    }
+}
+
+@media (max-width: 480px) {
+    .main-content {
+        margin-left: 135px !important;
+        padding: 15px !important;
+    }
+}

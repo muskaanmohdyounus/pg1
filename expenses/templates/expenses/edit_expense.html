@@ -1,4 +1,4 @@
-{% load static %}
+template {% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -12,15 +12,12 @@
   <!-- Google Font -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 
-  <!-- Optional Icon Pack -->
+  <!-- Bootstrap Icons -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
- <link rel="stylesheet" href="{% static 'expenses/css/edit_expense.css' %}?v=10">
-
-
+  <link rel="stylesheet" href="{% static 'expenses/css/edit_expense.css' %}?v=10">
 </head>
 
 <body>
-
   <nav class="navbar navbar-expand-lg">
     <div class="container">
       <a class="navbar-brand" href="{% url 'expense_list' %}">
@@ -29,7 +26,6 @@
     </div>
   </nav>
 
-
   <div class="container-wrapper">
     <div class="edit-card">
       <h3><i class="bi bi-pencil-square me-2 text-danger"></i>Edit Expense</h3>
@@ -37,39 +33,50 @@
       <form method="POST" enctype="multipart/form-data">
         {% csrf_token %}
 
-    
+        <!-- Expense Details -->
         <div class="form-section">
           <div class="form-title">Expense Details</div>
 
           <div class="form-row">
             <div class="form-group mb-3">
-              <label class="form-label">Title</label>
-              <input type="text" name="title" class="form-control" value="{{ expense.title }}" required>
+              <label class="form-label">Category</label>
+              <select name="category" class="form-select" required>
+                <option value="">-- Select Category --</option>
+                {% for cat in categories %}
+                  <option value="{{ cat.id }}" {% if expense.category and expense.category.id == cat.id %}selected{% endif %}>
+                    {{ cat.name }}
+                  </option>
+                {% endfor %}
+              </select>
             </div>
 
             <div class="form-group mb-3">
-              <label class="form-label">Amount (₹)</label>
-              <input type="number" name="amount" class="form-control" value="{{ expense.amount }}" step="0.01" required>
+              <label class="form-label">Subcategory</label>
+              <input type="text" name="sub_category" class="form-control" value="{{ expense.sub_category }}">
+            </div>
+
+            <div class="form-group mb-3">
+              <label class="form-label">Property</label>
+              <select name="property" class="form-select">
+                <option value="">-- Select Property --</option>
+                {% for prop in properties %}
+                  <option value="{{ prop.id }}" {% if expense.property and expense.property.id == prop.id %}selected{% endif %}>
+                    {{ prop.name }}
+                  </option>
+                {% endfor %}
+              </select>
             </div>
           </div>
 
           <div class="form-row">
             <div class="form-group mb-3">
-              <label class="form-label">Category</label>
-              <select name="category" class="form-control" required>
-                <option value="">-- Select Category --</option>
-                <option value="Rent" {% if expense.category == 'Rent' %}selected{% endif %}>Rent</option>
-                <option value="Electricity" {% if expense.category == 'Electricity' %}selected{% endif %}>Electricity</option>
-                <option value="Groceries" {% if expense.category == 'Groceries' %}selected{% endif %}>Groceries</option>
-                <option value="Maintenance" {% if expense.category == 'Maintenance' %}selected{% endif %}>Maintenance</option>
-                <option value="Salary" {% if expense.category == 'Salary' %}selected{% endif %}>Salary</option>
-                <option value="Misc" {% if expense.category == 'Misc' %}selected{% endif %}>Miscellaneous</option>
-              </select>
+              <label class="form-label">Amount (₹)</label>
+              <input type="number" name="amount" class="form-control" value="{{ expense.amount }}" step="0.01" required>
             </div>
 
             <div class="form-group mb-3">
-              <label class="form-label">Date</label>
-              <input type="date" name="date" class="form-control" value="{{ expense.date|date:'Y-m-d' }}" required>
+              <label class="form-label">Entry Date</label>
+              <input type="date" name="entry_date" class="form-control" value="{{ expense.entry_date|date:'Y-m-d' }}" required>
             </div>
           </div>
 
@@ -77,33 +84,55 @@
             <label class="form-label">Description</label>
             <textarea name="description" class="form-control" rows="3">{{ expense.description }}</textarea>
           </div>
+
+          <div class="form-row">
+            <div class="form-group mb-3">
+              <label class="form-label">Paid By</label>
+              <input type="text" name="paid_by" class="form-control" value="{{ expense.paid_by }}">
+            </div>
+
+            <div class="form-group mb-3">
+              <label class="form-label">Paid To</label>
+              <input type="text" name="paid_to" class="form-control" value="{{ expense.paid_to }}">
+            </div>
+
+            <div class="form-group mb-3">
+              <label class="form-label">Paid Mode</label>
+              <select name="paid_mode" class="form-select">
+                <option value="">-- Select Mode --</option>
+                <option value="Cash" {% if expense.paid_mode == 'Cash' %}selected{% endif %}>Cash</option>
+                <option value="UPI" {% if expense.paid_mode == 'UPI' %}selected{% endif %}>UPI</option>
+                <option value="Bank Transfer" {% if expense.paid_mode == 'Bank Transfer' %}selected{% endif %}>Bank Transfer</option>
+                <option value="Cheque" {% if expense.paid_mode == 'Cheque' %}selected{% endif %}>Cheque</option>
+              </select>
+            </div>
+          </div>
         </div>
 
-      
+        <!-- Bill Attachment -->
         <div class="form-section">
           <div class="form-title">Bill Attachment</div>
 
           {% if expense.bill_image %}
-            <div class="bill-preview">
+            <div class="bill-preview mb-3">
               <p class="fw-semibold text-secondary mb-2">Current Bill:</p>
-              <img src="{{ expense.bill_image.url }}" alt="Bill Image">
+              <img src="{{ expense.bill_image.url }}" alt="Bill Image" class="img-fluid">
             </div>
           {% else %}
             <p class="text-muted">No bill uploaded yet.</p>
           {% endif %}
 
-          <div class="mt-3">
+          <div class="mt-2">
             <label class="form-label fw-semibold">Upload New Bill (Optional)</label>
             <input type="file" name="bill_image" accept="image/*" class="form-control">
           </div>
         </div>
 
-       
         <button type="submit" class="btn btn-danger mt-3">
           <i class="bi bi-save me-1"></i> Save Changes
         </button>
 
-        <a href="{% url 'expense_list' %}" class="cancel-link d-block">Cancel</a>
+        <a href="{% url 'expense_list' %}" class="cancel-link d-block mt-2">Cancel</a>
       </form>
     </div>
   </div>

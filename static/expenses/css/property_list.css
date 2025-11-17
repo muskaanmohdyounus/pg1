@@ -1,0 +1,201 @@
+/* =======================
+   PAGE BACKGROUND
+======================= */
+body {
+    background: #f5f7fb;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+}
+
+/* =======================
+   MAIN CONTENT
+======================= */
+.main-content {
+    margin-left: 260px;  /* Sidebar width */
+    padding: 20px 40px;  /* top/bottom 20px, left/right 40px */
+    max-width: calc(100% - 260px); /* Prevent right overflow */
+    box-sizing: border-box;
+}
+
+/* Header Flex Wrapping */
+.d-flex.justify-content-between.align-items-center.mb-4 {
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+/* =======================
+   SUMMARY CARDS
+======================= */
+.summary-card {
+    background: #ffffff;
+    border-radius: 14px;
+    text-align: center;
+    padding: 18px;
+    border: 1px solid #e3e6ee;
+}
+
+/* =======================
+   PROPERTY CARDS
+======================= */
+.property-card {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* keeps button area aligned */
+    flex: 1 1 300px; /* maintains width while allowing equal height */
+    min-height: 300px; /* set your desired base height */
+    box-sizing: border-box;
+}
+
+/* Ensure inner content expands evenly */
+.property-card .card-body {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+.property-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.card-title {
+    font-weight: 600;
+    color: #1a1a1a;
+}
+
+.small.text-muted {
+    font-size: 0.85rem;
+}
+
+/* Progress Bar */
+.occupancy-bar {
+    height: 8px;
+    border-radius: 10px;
+    overflow: hidden;
+    background: #e9ecef;
+}
+
+.progress-bar {
+    background: #0d6efd;
+    width: var(--w);
+}
+
+/* Badges */
+.badge {
+    margin-right: 4px;
+    font-size: 0.75rem;
+    padding: 5px 8px;
+    border-radius: 6px;
+}
+
+/* =======================
+   INPUT + SELECT
+======================= */
+.form-control,
+.form-select {
+    border-radius: 10px;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+/* Reset Button */
+#clearFilters {
+    border-radius: 10px;
+    width: 100%;
+}
+
+/* =======================
+   PROPERTY GRID
+======================= */
+#propertyGrid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    justify-content: flex-start;
+    align-items: stretch; /* ensures equal height across cards */
+}
+/* Add button fix */
+a.btn-primary {
+    white-space: nowrap; /* Prevent button overflow */
+}
+
+/* Optional: ensure filters & cards don't overflow */
+.card.p-3.mb-4.shadow-sm,
+.row.g-3.mb-4 {
+    max-width: 100%;
+    box-sizing: border-box;
+}
+/* ✅ FINAL RESPONSIVE FIX: Proper center alignment on mobile */
+@media (max-width: 768px) {
+    .main-content,
+    .main {
+        margin-left: 0 !important;   /* remove sidebar offset */
+        max-width: 100% !important;
+        width: 100% !important;
+        padding: 80px 20px 20px 20px !important; /* space for menu toggle */
+        box-sizing: border-box;
+    }
+
+    /* Optional: make sure it’s centered visually */
+    body {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        overflow-x: hidden;
+    }
+
+    /* Headings and top bar alignment fix */
+    .header, 
+    .d-flex.justify-content-between.align-items-center.mb-4 {
+        width: 100%;
+        margin-top: 60px;  /* below toggle */
+        justify-content: space-between;
+        padding: 0 5px;
+    }
+
+    /* Text headings */
+    .header h1,
+    .main-content h1,
+    .main-content h2 {
+        margin-left: 10px;
+        text-align: left;
+    }
+}
+/* ✅ Fine-tuned heading alignment beside toggle (mobile only) */
+@media (max-width: 768px) {
+    .header {
+        margin-top: 5px !important;        /* ⬆️ bring heading higher */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        width: 100%;
+        padding: 0 10px;
+    }
+
+    .header h1,
+    .header h2 {
+        font-size: 22px;
+        font-weight: 700;
+        margin: 0;
+        color: #7f1d1d;
+        text-align: center;
+    }
+
+    .menu-toggle {
+        position: absolute;
+        top: 12px;                         /* keep toggle snug near top */
+        left: 15px;
+        z-index: 3000;
+    }
+}
+@media (max-width: 768px) {
+  .main-content h1 {
+    margin-top: 8px !important; /* reduce the top gap */
+  }
+
+  .main-content {
+    padding-top: 10px !important; /* slightly reduce top padding */
+  }
+}

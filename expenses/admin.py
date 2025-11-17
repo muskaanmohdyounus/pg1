@@ -14,3 +14,17 @@ class ManagerProfileAdmin(admin.ModelAdmin):
 class ManagerOnboardingAdmin(admin.ModelAdmin):
     list_display = ('user', 'answer1', 'answer2', 'answer3', 'answer4', 'answer5', 'created_at')
     search_fields = ('user__username', 'answer1', 'answer2')
+
+from .models import Property, PropertyImage
+
+class PropertyImageInline(admin.TabularInline):
+    model = PropertyImage
+    extra = 1
+
+@admin.register(Property)
+class PropertyAdmin(admin.ModelAdmin):
+    list_display = ('name', 'type', 'tenant_type', 'status', 'city')
+    search_fields = ('name', 'city')
+    inlines = [PropertyImageInline]
+
+admin.site.register(PropertyImage)

@@ -1,5 +1,4 @@
 {% load static %}
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,172 +6,199 @@
   <title>🔥 Expense Tracker Dashboard</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <!-- Bootstrap -->
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Fonts + Icons -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet">
 
-  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-  <link rel="stylesheet" href="{% static 'expenses/css/expense_list.css' %}">
+  <!-- Custom CSS -->
+  <link rel="stylesheet" href="{% static 'expenses/css/expense_list.css' %}?v=17">
+  <link rel="stylesheet" href="{% static 'expenses/css/sidebar.css' %}">
 </head>
-
 <body>
 
-<div class="sidebar">
-    <div class="logo-wrapper">
-        <div class="logo-container">
-            <img src="{% static 'expenses/images/logo.jpeg' %}" alt="Logo">
-            <h2>Expense Tracker</h2>
-        </div>
-    </div>
-
-    <a href="{% url 'expense_list' %}"><i class="fas fa-table"></i> Dashboard</a>
-    <a href="{% url 'add_expense' %}"><i class="fas fa-plus-circle"></i> Add Expense</a>
-    <a href="{% url 'reports' %}"><i class="fas fa-chart-pie"></i> Reports</a>
-    <a href="{% url 'settings' %}"><i class="fas fa-cog"></i> Settings</a>
-
-    {% if user.is_authenticated %}
-    <div class="logout-container">
-      <form method="POST" action="{% url 'logout' %}">
-        {% csrf_token %}
-        <button type="submit" class="logout">
-          <i class="fas fa-sign-out-alt"></i> Logout
-        </button>
-      </form>
-    </div>
-    {% endif %}
-</div>
-
-
+<!-- Include universal sidebar -->
+{% include 'expenses/sidebar.html' %}
+ 
 <div class="main">
     <div class="header">
       <h1>Welcome, <span>{{ user.username }}</span> 👋</h1>
+      <a href="{% url 'add_expense' %}" class="btn btn-primary add-expense-btn">
+        <i class="fas fa-plus-circle"></i> Add Expense
+      </a>
     </div>
 
-    <div class="stats">
-      <div class="card">
-        <h2>Total Expense</h2>
-        <p>₹{{ total }}</p>
-      </div>
-      <div class="card">
-        <h2>Categories</h2>
-        <p>{{ category_totals_json|length }}</p>
-      </div>
+    <!-- Summary Cards -->
+    <div class="summary-cards">
+        <div class="card">
+            <h4>Total Expense</h4>
+            <p>₹{{ total }}</p>
+        </div>
+        {% for key, value in category_summary.items %}
+        <div class="card">
+            <h4>{{ key }} Expense</h4>
+            <p>₹{{ value }}</p>
+        </div>
+        {% endfor %}
+        <div class="card">
+            <h4>Highest Expense</h4>
+            <p>
+              {% if highest_expense %}
+                ₹{{ highest_expense.amount }}
+              {% else %}
+                ₹0
+              {% endif %}
+            </p>
+        </div>
     </div>
 
-    <form method="GET" action="{% url 'expense_list' %}" class="filter-box">
-      <input type="text" name="q" list="categories" placeholder="🔍 Search category..." value="{{ query|default:'' }}">
-      <datalist id="categories">
-        <option value="Rent">
-        <option value="Electricity">
-        <option value="Groceries">
-        <option value="Maintenance">
-        <option value="Salary">
-        <option value="Miscellaneous">
-      </datalist>
-      <label>From:</label>
-      <input type="date" name="start_date" value="{{ start_date|default:'' }}">
-      <label>To:</label>
-      <input type="date" name="end_date" value="{{ end_date|default:'' }}">
-      <button type="submit">Apply</button>
-      {% if query or start_date or end_date %}
-        <a href="{% url 'expense_list' %}">Clear</a>
-      {% endif %}
-    </form>
+    <!-- Filter Button -->
+    <button id="openFilter" class="btn btn-outline-danger mb-3">
+        <i class="fas fa-filter"></i> Filter
+    </button>
 
-    <table>
-      <tr>
-        <th>Title</th>
-        <th>Amount</th>
-        <th>Category</th>
-        <th>Date</th>
-        <th>Description</th>
-        <th>Bill</th>
-        <th>Action</th>
-      </tr>
+    <!-- Filter Sidebar -->
+    <div class="filter-sidebar" id="filterSidebar">
+        <div class="filter-header">
+            <h4>Filter Expenses</h4>
+            <button id="closeFilter" class="btn btn-sm btn-danger">X</button>
+        </div>
+        
+        <div class="filter-body">
+            <form method="GET" action="{% url 'expense_list' %}">
+                <!-- Title / Description -->
+                <div class="mb-3">
+                    <label class="form-label">Title / Description</label>
+                    <input type="text" id="title" name="title" class="form-control" placeholder="Search title/description">
+                </div>
 
-      {% for expense in expenses %}
-      <tr>
-        <td>{{ expense.title }}</td>
-        <td>₹{{ expense.amount }}</td>
-        <td>{{ expense.category }}</td>
-        <td>{{ expense.date }}</td>
+                <!-- Category -->
+                <div class="mb-3">
+                    <label class="form-label">Category</label>
+                    <select id="category" name="category" class="form-select">
+                        <option value="">All</option>
+                        {% for cat in category_summary.keys %}
+                        <option value="{{ cat }}">{{ cat }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
 
-        <!-- ✅ Read More Feature -->
-        <td class="desc-cell">
-            <span class="short-text">{{ expense.description|truncatechars:15 }}</span>
-            <span class="full-text" style="display:none;">{{ expense.description }}</span>
+                <!-- Property -->
+                <div class="mb-3">
+                    <label class="form-label">Property</label>
+                    <select id="property" name="property" class="form-select">
+                        <option value="">-- Select Property --</option>
+                        {% for prop in properties %}
+                        <option value="{{ prop.id }}">{{ prop.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
 
-            {% if expense.description|length > 50 %}
-            <button class="read-more-btn">Read more</button>
-            {% endif %}
-        </td>
+                <!-- Amount Range -->
+                <div class="mb-3">
+                    <label class="form-label">Amount Range</label>
+                    <div class="d-flex gap-2">
+                        <input type="number" id="minAmount" name="minAmount" class="form-control" placeholder="Min">
+                        <input type="number" id="maxAmount" name="maxAmount" class="form-control" placeholder="Max">
+                    </div>
+                </div>
 
-        <td>
-          {% if expense.bill_image %}
-            <a href="{{ expense.bill_image.url }}" target="_blank">📎 View</a>
-          {% else %}
-            <span style="color:#9ca3af;">No file</span>
-          {% endif %}
-        </td>
+                <!-- Date Range -->
+                <div class="mb-3">
+                    <label class="form-label">Start Date</label>
+                    <input type="date" id="startDate" name="startDate" class="form-control">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">End Date</label>
+                    <input type="date" id="endDate" name="endDate" class="form-control">
+                </div>
 
-        <td>
-          <a class="edit" href="{% url 'edit_expense' expense.id %}">Edit</a>
-          <a class="delete" href="{% url 'delete_expense' expense.id %}">Delete</a>
-        </td>
-      </tr>
+                <!-- Quick Date Buttons -->
+                <div class="mb-3 d-flex gap-2 flex-wrap">
+                    <button type="button" class="btn btn-outline-secondary quick-date" data-range="7">Last 7 Days</button>
+                    <button type="button" class="btn btn-outline-secondary quick-date" data-range="30">Last 30 Days</button>
+                    <button type="button" class="btn btn-outline-secondary quick-date" data-range="90">Last 90 Days</button>
+                </div>
 
-      {% empty %}
-      <tr><td colspan="7" style="text-align:center;">No expenses found.</td></tr>
-      {% endfor %}
-    </table>
+                <!-- Has Bill -->
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="hasBill" name="hasBill">
+                    <label class="form-check-label" for="hasBill">Has Bill</label>
+                </div>
 
-    <div class="chart-container">
-      <h2>Expenses by Category</h2>
-      <canvas id="categoryChart"></canvas>
-      {{ category_totals_json|json_script:"category-data" }}
+                <!-- Buttons -->
+                <div class="d-flex gap-2">
+                    <button type="button" id="resetFilters" class="btn btn-secondary w-50">Reset</button>
+                    <button type="submit" id="applyFilters" class="btn btn-danger w-50">Apply</button>
+                </div>
+            </form>
+        </div>
     </div>
+
+    <!-- Chart -->
+    <div class="chart-container mt-4">
+        <h2>Expenses by Category</h2>
+        <canvas id="categoryChart"></canvas>
+    </div>
+
+    <!-- Expense Table -->
+    <div class="expense-table-wrapper mt-4">
+      <table class="expense-table table table-striped table-hover">
+        <thead>
+          <tr>
+            <th>Category</th>
+            <th>Subcategory</th>
+            <th>Property</th>
+            <th>Amount</th>
+            <th>Entry Date</th>
+            <th>Created At</th>
+            <th>Description</th>
+            <th>Paid By</th>
+            <th>Paid To</th>
+            <th>Paid Mode</th>
+            <th>Bill</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for expense in expenses %}
+          <tr class="clickable-row" data-url="{% url 'expense_detail' expense.id %}">
+              <td>{% if expense.category %}{{ expense.category.name }}{% else %}No Category{% endif %}</td>
+              <td>{{ expense.sub_category|default:"No Subcategory" }}</td>
+              <td>{% if expense.property %}{{ expense.property.name }}{% else %}No Property{% endif %}</td>
+              <td>₹{{ expense.amount }}</td>
+              <td>{{ expense.entry_date|date:"Y-m-d" }}</td>
+              <td>{{ expense.created_at|date:"Y-m-d H:i" }}</td>
+              <td>{{ expense.description|truncatechars:50 }}</td>
+              <td>{{ expense.paid_by|default:"N/A" }}</td>
+              <td>{{ expense.paid_to|default:"N/A" }}</td>
+              <td>{{ expense.paid_mode|default:"N/A" }}</td>
+              <td>{% if expense.bill_image %}<a href="{{ expense.bill_image.url }}" target="_blank">📎 View</a>{% else %}No Bill{% endif %}</td>
+              <td>
+                  <a href="{% url 'edit_expense' expense.id %}" class="edit">Edit</a>
+                  <a href="{% url 'delete_expense' expense.id %}" class="delete">Delete</a>
+              </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td colspan="12" class="text-center">No expenses found.</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pass chart data safely to JS -->
+    {{ chart_labels|json_script:"chart-labels" }}
+    {{ chart_values|json_script:"chart-values" }}
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="{% static 'expenses/js/expense_list.js' %}?v=13"></script>
 </div>
-
-
-<script>
-const categoryData = JSON.parse(document.getElementById('category-data').textContent);
-const labels = categoryData.map(item => item.category);
-const data = categoryData.map(item => item.total_amount);
-const ctx = document.getElementById('categoryChart').getContext('2d');
-const colors = ['#f87171','#ef4444','#b91c1c','#fecaca','#fb7185','#fca5a5'];
-
-new Chart(ctx, {
-  type: 'doughnut',
-  data: { labels, datasets: [{ data, backgroundColor: colors, borderWidth: 2, borderColor: '#fff' }] },
-  options: { responsive: true, plugins: { legend: { position: 'right' } } }
-});
-</script>
-
-
-<!-- ✅ Read More Toggle Script -->
-<script>
-document.querySelectorAll(".read-more-btn").forEach(btn => {
-    btn.addEventListener("click", () => {
-        const cell = btn.parentElement;
-        const shortText = cell.querySelector(".short-text");
-        const fullText = cell.querySelector(".full-text");
-
-        if (fullText.style.display === "none") {
-            fullText.style.display = "inline";
-            shortText.style.display = "none";
-            btn.textContent = "Read less";
-        } else {
-            fullText.style.display = "none";
-            shortText.style.display = "inline";
-            btn.textContent = "Read more";
-        }
-    });
-});
-</script>
-
 </body>
 </html>

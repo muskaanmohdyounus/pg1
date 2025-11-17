@@ -1,0 +1,81 @@
+/* =======================
+   MAIN CONTENT
+======================= */
+.main-content {
+    margin-left: 260px;  /* match your sidebar width */
+    padding: 40px;
+    box-sizing: border-box;
+    min-height: 100vh;
+    background: #f5f7fb;
+}
+
+/* =======================
+   PAGE HEADER
+======================= */
+.page-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 30px;
+}
+
+.page-header h3 {
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: #333;
+}
+
+.page-header .btn {
+    white-space: nowrap;
+}
+
+/* =======================
+   CHART CARD
+======================= */
+.chart-card {
+    background: #fff;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+    max-width: 1000px;
+    margin: 0 auto;
+}
+
+#occupancyChart {
+    width: 100% !important;
+    height: 450px !important;
+}
+
+/* =======================
+   BUTTONS
+======================= */
+.btn-refresh {
+    background-color: #dc3545;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 12px;
+    font-weight: 600;
+    transition: 0.3s;
+}
+
+.btn-refresh:hover {
+    background-color: #b91c1c;
+    transform: scale(1.05);
+}
+
+/* =======================
+   RESPONSIVE
+======================= */
+@media (max-width: 768px) {
+    .main-content {
+        margin-left: 90px; /* if sidebar collapses on mobile */
+        padding: 20px;
+    }
+
+    #occupancyChart {
+        height: 300px !important;
+    }
+}

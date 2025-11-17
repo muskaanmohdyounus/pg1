@@ -1,0 +1,267 @@
+/* ---------- GENERAL PAGE ---------- */
+body {
+    background: linear-gradient(135deg, #fdfbfb, #ebedee);
+    font-family: 'Poppins', sans-serif;
+    color: #333;
+    margin: 0;
+    padding: 20px;
+}
+
+/* ---------- MAIN CARD ---------- */
+.property-detail-card {
+    border-radius: 18px;
+    background: #ffffff;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+    border: none;
+    padding: 25px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.property-detail-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.12);
+}
+
+/* ---------- PROPERTY IMAGE ---------- */
+.property-image {
+    height: 320px;
+    width: 100%;
+    object-fit: cover;
+    border-radius: 14px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+/* ---------- SECTION TITLE ---------- */
+.section-title {
+    font-weight: 600;
+    margin-top: 25px;
+    margin-bottom: 12px;
+    color: #222;
+    font-size: 1.2rem;
+    border-left: 5px solid #ff4d4d;
+    padding-left: 10px;
+}
+
+/* ---------- TABLE STYLING ---------- */
+.occupancy-table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 12px;
+    overflow: hidden;
+    margin-top: 10px;
+}
+
+.occupancy-table th, 
+.occupancy-table td {
+    padding: 12px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.occupancy-table th {
+    background-color: #f6f8fc;
+    font-weight: 600;
+    color: #333;
+}
+
+.occupancy-table tr:nth-child(even) {
+    background-color: #fafbfc;
+}
+
+/* ---------- PROGRESS BAR ---------- */
+.occupancy-bar {
+    height: 14px;
+    border-radius: 7px;
+    background: #e9ecef;
+    overflow: hidden;
+    margin-top: 5px;
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ef4444, #dc2626); /* red gradient */
+    border-radius: 7px;
+    width: 0;
+    transition: width 1s ease;
+}
+
+/* ---------- BUTTONS ---------- */
+.btn-primary {
+    background: linear-gradient(135deg, #2563eb, #1e40af);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 8px 20px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #1d4ed8, #1e3a8a);
+    transform: translateY(-2px);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 8px 20px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-danger:hover {
+    background: linear-gradient(135deg, #b91c1c, #991b1b);
+    transform: translateY(-2px);
+}
+
+.btn-secondary {
+    background: linear-gradient(135deg, #6b7280, #4b5563);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 8px 20px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-secondary:hover {
+    background: linear-gradient(135deg, #4b5563, #374151);
+    transform: translateY(-2px);
+}
+
+/* ---------- RESPONSIVE ---------- */
+@media (max-width: 768px) {
+    .property-image {
+        height: 240px;
+    }
+
+    .section-title {
+        font-size: 1rem;
+    }
+
+    .btn-primary,
+    .btn-danger,
+    .btn-secondary {
+        width: 100%;
+        margin-bottom: 10px;
+    }
+}
+
+/* ---------- RESPONSIVE REFINEMENTS ---------- */
+@media (max-width: 992px) {
+    .property-detail-card {
+        padding: 20px;
+    }
+
+    .property-image {
+        height: 260px;
+    }
+
+    .occupancy-table th, .occupancy-table td {
+        padding: 10px;
+    }
+}
+
+@media (max-width: 768px) {
+    .main-content {
+        margin-left: 0 !important;
+        padding: 20px !important;
+        box-sizing: border-box;
+    }
+
+    /* Header section neat stacking */
+    .d-flex.justify-content-between.align-items-center.mb-4 {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+        margin-top: 4px;
+    }
+
+    .d-flex.justify-content-between.align-items-center.mb-4 h3 {
+        font-size: 1.2rem;
+        margin-bottom: 0;
+    }
+
+    /* Buttons smaller but inline */
+    .btn-primary,
+    .btn-danger,
+    .btn-secondary {
+        font-size: 0.9rem;
+        padding: 6px 14px;
+        border-radius: 8px;
+        width: auto;
+    }
+
+    /* Arrange buttons neatly in a row with wrapping */
+    .d-flex.gap-2 {
+        flex-wrap: wrap;
+        gap: 6px;
+    }
+
+    /* Image smaller */
+    .property-image {
+        height: 220px;
+    }
+
+    /* --- Clean, scrollable occupancy table --- */
+    .occupancy-table {
+        border-collapse: collapse;
+        width: 100%;
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+        border-radius: 10px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+
+    .occupancy-table th, .occupancy-table td {
+        font-size: 0.9rem;
+        padding: 8px 12px;
+        text-align: center;
+    }
+
+    .occupancy-table th {
+        background-color: #f5f6fa;
+    }
+
+    .occupancy-table tr:nth-child(even) {
+        background-color: #fafafa;
+    }
+
+    .occupancy-bar {
+        height: 10px;
+    }
+
+    .section-title {
+        font-size: 1.05rem;
+        margin-top: 18px;
+    }
+}
+
+@media (max-width: 576px) {
+    .property-detail-card {
+        padding: 16px;
+    }
+
+    .property-image {
+        height: 180px;
+    }
+
+    .section-title {
+        font-size: 1rem;
+    }
+
+    .occupancy-table th, .occupancy-table td {
+        padding: 6px 10px;
+        font-size: 0.85rem;
+    }
+
+    .btn-primary,
+    .btn-danger,
+    .btn-secondary {
+        font-size: 0.85rem;
+        padding: 6px 12px;
+    }
+}

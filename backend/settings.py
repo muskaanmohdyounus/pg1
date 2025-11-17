@@ -26,7 +26,11 @@ SECRET_KEY = 'django-insecure-#4k$fo0rql6j(_g2qczkq3)fhq)t&cv)c0$zf8!xl%-jd+p#8k
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['128.199.19.252', 'localhost', '127.0.0.1']
+
+
+
+
 
 
 # Application definition
@@ -74,14 +78,32 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-import dj_database_url
 import os
+import dj_database_url
+from pathlib import Path
 
-DATABASES = {
-    'default': dj_database_url.parse(
-        os.environ.get("DATABASE_URL")
-    )
-}
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+db_url = os.environ.get("DATABASE_URL")
+
+# Convert bytes to string if needed
+if isinstance(db_url, bytes):
+    db_url = db_url.decode("utf-8")
+
+if db_url and db_url.strip():
+    # ✅ Use DATABASE_URL only if it exists & is not empty
+    DATABASES = {
+        "default": dj_database_url.parse(db_url)
+    }
+else:
+    # ✅ Fallback to SQLite (no errors)
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR / "db.sqlite3",
+        }
+    }
+
 
 
 

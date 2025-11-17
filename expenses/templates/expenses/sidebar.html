@@ -1,19 +1,36 @@
 {% load static %}
 
-<div class="sidebar">
+<!-- ✅ Menu Toggle Button (only shows on small screens) -->
+<button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+<!-- Small screen menu (hidden by default) -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="{% url 'expense_list' %}"><i class="fas fa-table"></i> Expenses</a>
+ <a href="{% url 'property_list' %}"><i class="fas fa-building"></i> Properties</a>
+  <a href="{% url 'reports' %}"><i class="fas fa-chart-pie"></i> Reports</a>
+  <a href="{% url 'settings' %}"><i class="fas fa-cog"></i> Settings</a>
+  {% if user.is_authenticated %}
+  <form method="POST" action="{% url 'logout' %}" class="logout-form">
+    {% csrf_token %}
+    <button class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+  </form>
+  {% endif %}
+</div>
 
-    <!-- ✅ White Logo Box -->
+<!-- ✅ Sidebar -->
+<div class="sidebar" id="sidebar">
+    <!-- White Logo Box -->
     <div class="logo-box">
         <img src="{% static 'expenses/images/logo.jpeg' %}" alt="Logo" class="logo-img">
         <h2 class="logo-text">Expense<br>Tracker</h2>
     </div>
 
     <a href="{% url 'expense_list' %}">
-        <i class="fas fa-table"></i> Dashboard
+        <i class="fas fa-table"></i> Expenses
     </a>
 
-    <a href="{% url 'add_expense' %}">
-        <i class="fas fa-plus-circle"></i> Add Expense
+
+    <a href="{% url 'property_list' %}">
+        <i class="fas fa-building"></i> Properties
     </a>
 
     <a href="{% url 'reports' %}">
@@ -30,5 +47,23 @@
         <button class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
     </form>
     {% endif %}
-
 </div>
+
+<!-- ✅ Sidebar Toggle Script -->
+<script>
+function toggleSidebar() {
+  const menu = document.getElementById('mobileMenu');
+  menu.classList.toggle('show');
+}
+
+// Optional: close menu when clicking outside
+document.addEventListener('click', function(e) {
+  const menu = document.getElementById('mobileMenu');
+  const button = document.querySelector('.menu-toggle');
+  if (!menu.contains(e.target) && !button.contains(e.target)) {
+    menu.classList.remove('show');
+  }
+});
+</script>
+
+

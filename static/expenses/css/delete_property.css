@@ -1,0 +1,22 @@
+body {
+    background: #f5f7fb;
+}
+
+/* Delete confirmation card */
+.delete-card {
+    background: #ffffff;
+    border-radius: 14px;
+    border: 1px solid #e3e6ee;
+}
+
+.delete-card h3 {
+    color: #d9534f;
+}
+
+.btn-danger {
+    border-radius: 10px;
+}
+
+.btn-secondary {
+    border-radius: 10px;
+}
