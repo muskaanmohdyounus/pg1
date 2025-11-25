@@ -1,0 +1,7 @@
+<h3>Are you sure you want to delete this rent record?</h3>
+
+<form method="POST">
+    {% csrf_token %}
+    <button class="btn btn-danger">Yes, Delete</button>
+    <a href="{% url 'tenant_rent' %}" class="btn btn-secondary">Cancel</a>
+</form>

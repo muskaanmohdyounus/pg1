@@ -22,4 +22,17 @@ urlpatterns = [
     path('properties/<int:id>/edit/', views.edit_property, name='edit_property'),
     path('properties/<int:id>/delete/', views.delete_property, name='delete_property'),
     path('properties/graph/', views.property_graph, name='property_graph'),
+    path("rent/add/", views.add_rent, name="add_rent"),
+    path('tenant/rent/edit/<int:id>/', views.edit_rent, name='edit_rent'),
+    path('tenant/rent/delete/<int:id>/', views.delete_rent, name='delete_rent'),
+    path('tenant/rent/', views.tenant_rent, name='tenant_rent'),
+    path('tenant/loans/', views.tenant_loan_list, name='tenant_loan_list'),
+    path('tenant/loans/apply/', views.tenant_apply_loan, name='tenant_apply_loan'),
+    path('tenant/loans/<int:pk>/edit/', views.tenant_edit_loan, name='tenant_edit_loan'),
+    path('tenant/loans/<int:pk>/delete/', views.tenant_delete_loan, name='tenant_delete_loan'),
+    path('login/select/', views.select_login_type, name='select_login_type'),
+    path('tenant/login/', views.tenant_login, name='tenant_login'),
+    path('tenant/signup/', views.tenant_signup, name='tenant_signup'),
+
+
 ]

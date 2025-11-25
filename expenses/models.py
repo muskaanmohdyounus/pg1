@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+
 # ---------------------------
 # Property Models (Do not touch)
 # ---------------------------
@@ -144,3 +145,136 @@ class ManagerOnboarding(models.Model):
 
     def __str__(self):
         return f"Onboarding - {self.user.username}"
+
+
+
+import uuid
+from django.db import models
+
+class Rent(models.Model):
+    # Tenant Details
+    tenant_name = models.CharField(max_length=150)
+
+    tenant_id = models.CharField(max_length=10, unique=True, editable=False)
+
+    room_number = models.CharField(max_length=20)
+
+    # Billing Information
+    billing_month = models.CharField(max_length=20)     # January, February...
+    billing_year = models.IntegerField()
+
+    billing_date = models.DateField()                   # Date they paid
+
+    rent_cycle = models.CharField(max_length=50)        # Salary calendar
+
+    rent_amount = models.DecimalField(max_digits=10, decimal_places=2)
+
+    PAYMENT_METHODS = (
+        ("UPI", "UPI"),
+        ("Card", "Card"),
+        ("NetBanking", "NetBanking"),
+        ("Wallet", "Wallet"),
+        ("Cash", "Cash"),
+    )
+    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHODS)
+
+    # Payment Proof
+    utr_number = models.CharField(max_length=100, blank=True, null=True)
+
+    bill_upload = models.FileField(upload_to="rent_bills/", blank=True, null=True)
+
+    notes = models.TextField(blank=True, null=True)
+
+    # Auto timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    # Auto generate tenant ID once
+    def save(self, *args, **kwargs):
+        if not self.tenant_id:
+            self.tenant_id = str(uuid.uuid4()).split("-")[0].upper()
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.tenant_name} - {self.billing_month} {self.billing_year}"
+
+
+from django.db import models
+from django.utils import timezone
+
+class Loan(models.Model):
+    # Status Choices
+    STATUS_PENDING = 'pending'
+    STATUS_APPROVED = 'approved'
+    STATUS_REJECTED = 'rejected'
+    STATUS_DISBURSED = 'disbursed'
+    STATUS_COMPLETED = 'completed'
+
+    STATUS_CHOICES = [
+        (STATUS_PENDING, 'Pending'),
+        (STATUS_APPROVED, 'Approved'),
+        (STATUS_REJECTED, 'Rejected'),
+        (STATUS_DISBURSED, 'Disbursed'),
+        (STATUS_COMPLETED, 'Completed'),
+    ]
+
+    # Tenant details (NO FOREIGN KEY NOW)
+    tenant_name = models.CharField(max_length=255)
+    tenant_id = models.CharField(max_length=100)
+    room_number = models.CharField(max_length=50, blank=True, null=True)
+
+    # Tenant-supplied fields
+    loan_amount_requested = models.DecimalField(max_digits=10, decimal_places=2)
+    loan_purpose = models.CharField(max_length=255)
+    loan_type = models.CharField(max_length=100, blank=True, null=True)
+    repayment_months = models.PositiveIntegerField(default=1)
+    document = models.FileField(upload_to='loan_docs/', blank=True, null=True)
+    notes = models.TextField(blank=True, null=True)
+
+    # Admin fields (owner updates these)
+    approved_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    approved_date = models.DateTimeField(blank=True, null=True)
+    admin_notes = models.TextField(blank=True, null=True)
+
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default=STATUS_PENDING)
+
+    # Auto timestamps
+    applied_date = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    # Calculated field
+    monthly_installment = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+
+    class Meta:
+        ordering = ['-applied_date']
+
+    def __str__(self):
+        return f"Loan #{self.pk} - {self.tenant_name} - {self.status}"
+
+    def calc_installment_source_amount(self):
+        # EMI uses approved_amount if exists, else requested amount
+        return self.approved_amount if self.approved_amount else self.loan_amount_requested
+
+    def calculate_monthly_installment(self):
+        source_amount = self.calc_installment_source_amount() or 0
+        months = self.repayment_months or 1
+        try:
+            return round(source_amount / months, 2)
+        except:
+            return 0
+
+    def save(self, *args, **kwargs):
+        # Recalculate EMI on every save
+        self.monthly_installment = self.calculate_monthly_installment()
+        super().save(*args, **kwargs)
+
+
+class Tenant(models.Model):
+    tenant_name = models.CharField(max_length=100)
+    tenant_phone = models.CharField(max_length=15)
+    tenant_email = models.EmailField(unique=True)
+    property_name = models.CharField(max_length=100)
+    room_number = models.CharField(max_length=20)
+    password = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.tenant_name

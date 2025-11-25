@@ -9,6 +9,7 @@ from .models import Expense, OTP, ManagerProfile
 from django.contrib import messages
 from django.contrib.auth.models import User
 from .models import ManagerOnboarding
+from .models import Rent
 
 
 
@@ -526,3 +527,285 @@ def property_graph(request):
     }
 
     return render(request, 'expenses/property_graph.html', context)
+ 
+
+from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.db.models import Sum
+from .models import Rent, Loan
+from .forms import LoanForm
+
+# ============================================================
+# TENANT RENT VIEWS
+# ============================================================
+
+def tenant_rent(request):
+    """
+    Show all rents and handle rent submission
+    """
+    if request.method == "POST":
+        Rent.objects.create(
+            tenant_name=request.POST.get("tenant_name"),
+            room_number=request.POST.get("room_number"),
+            billing_month=request.POST.get("billing_month"),
+            billing_year=request.POST.get("billing_year"),
+            billing_date=request.POST.get("billing_date"),
+            rent_cycle=request.POST.get("rent_cycle"),
+            rent_amount=request.POST.get("rent_amount"),
+            payment_method=request.POST.get("payment_method"),
+            utr_number=request.POST.get("utr_number"),
+            bill_upload=request.FILES.get("bill_upload"),
+            notes=request.POST.get("notes"),
+        )
+        messages.success(request, "Rent added successfully.")
+        return redirect("tenant_rent")
+
+    rents = Rent.objects.all().order_by("-created_at")
+    return render(request, "expenses/tenant/tenant_rent.html", {"rents": rents})
+
+from django.shortcuts import render, redirect
+from .models import Rent
+
+def add_rent(request):
+    if request.method == "POST":
+        Rent.objects.create(
+            tenant_name=request.POST.get("tenant_name"),
+            room_number=request.POST.get("room_number"),
+            billing_month=request.POST.get("billing_month"),
+            billing_year=request.POST.get("billing_year"),
+            billing_date=request.POST.get("billing_date"),
+            rent_cycle=request.POST.get("rent_cycle"),
+            rent_amount=request.POST.get("rent_amount"),
+            payment_method=request.POST.get("payment_method"),
+            utr_number=request.POST.get("utr_number"),
+            bill_upload=request.FILES.get("bill_upload"),
+            notes=request.POST.get("notes"),
+        )
+        return redirect("tenant_rent")
+
+    return render(request, "expenses/tenant/add_rent.html")
+
+def edit_rent(request, id):
+    rent = get_object_or_404(Rent, id=id)
+
+    if request.method == "POST":
+        rent.tenant_name = request.POST.get("tenant_name")
+        rent.room_number = request.POST.get("room_number")
+        rent.billing_month = request.POST.get("billing_month")
+        rent.billing_year = request.POST.get("billing_year")
+        rent.rent_amount = request.POST.get("rent_amount")
+        rent.payment_method = request.POST.get("payment_method")
+        rent.notes = request.POST.get("notes")
+        rent.save()
+        messages.success(request, "Rent updated successfully.")
+        return redirect("tenant_rent")
+
+    return render(request, "expenses/tenant/edit_rent.html", {"rent": rent})
+
+
+def delete_rent(request, id):
+    rent = get_object_or_404(Rent, id=id)
+    rent.delete()
+    messages.success(request, "Rent deleted successfully.")
+    return redirect("tenant_rent")
+
+
+# ============================================================
+# HELPER: Read tenant info from session
+# ============================================================
+
+def get_current_tenant(request):
+    tenant_id = request.session.get("tenant_id")
+    tenant_name = request.session.get("tenant_name")
+    room_number = request.session.get("room_number")
+
+    if not tenant_id or not tenant_name:
+        return None
+
+    return {
+        "tenant_id": tenant_id,
+        "tenant_name": tenant_name,
+        "room_number": room_number,
+    }
+
+
+# ============================================================
+# TENANT LOAN VIEWS
+# ============================================================
+
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.db.models import Sum
+from .models import Loan
+from .forms import LoanForm
+
+# Helper to get tenant info from session
+def get_current_tenant(request):
+    tenant_id = request.session.get("tenant_id")
+    tenant_name = request.session.get("tenant_name")
+    room_number = request.session.get("room_number")
+
+    if not tenant_id or not tenant_name:
+        return None
+
+    return {
+        "tenant_id": tenant_id,
+        "tenant_name": tenant_name,
+        "room_number": room_number,
+    }
+
+# ============================
+# TENANT LOAN VIEWS
+# ============================
+
+@login_required
+def tenant_loan_list(request):
+    tenant = get_current_tenant(request)
+
+    # If tenant info missing, show empty list
+    if not tenant:
+        messages.warning(request, "Tenant info not found in session.")
+        loans = Loan.objects.none()
+    else:
+        loans = Loan.objects.filter(tenant_id=tenant["tenant_id"])
+
+    total_taken = loans.aggregate(total=Sum("approved_amount"))["total"] or 0
+    total_pending = loans.filter(status="pending").aggregate(total=Sum("loan_amount_requested"))["total"] or 0
+    emi_this_month = loans.filter(status__in=["approved", "disbursed"]).aggregate(total=Sum("monthly_installment"))["total"] or 0
+    last_loan = loans.first() if loans.exists() else None
+
+    return render(request, "expenses/tenant/tenantloan.html", {
+        "loans": loans,
+        "tenant": tenant,
+        "total_taken": total_taken,
+        "total_pending": total_pending,
+        "emi_this_month": emi_this_month,
+        "last_loan": last_loan,
+    })
+
+
+@login_required
+def tenant_apply_loan(request):
+    tenant = get_current_tenant(request)
+
+    if request.method == "POST":
+        form = LoanForm(request.POST, request.FILES)
+        if form.is_valid():
+            loan = form.save(commit=False)
+
+            # Fill tenant info if available
+            if tenant:
+                loan.tenant_name = tenant["tenant_name"]
+                loan.tenant_id = tenant["tenant_id"]
+                loan.room_number = tenant["room_number"]
+
+            loan.status = "pending"
+            loan.save()
+            messages.success(request, "Loan application submitted successfully.")
+            return redirect("tenant_loan_list")
+    else:
+        form = LoanForm()
+
+    return render(request, "expenses/tenant/loan_apply.html", {"form": form})
+
+
+@login_required
+def tenant_edit_loan(request, pk):
+    tenant = get_current_tenant(request)
+    if not tenant:
+        messages.error(request, "Tenant info missing.")
+        return redirect("tenant_loan_list")
+
+    loan = get_object_or_404(Loan, pk=pk, tenant_id=tenant["tenant_id"])
+    if loan.status != "pending":
+        messages.error(request, "Only pending loans can be edited.")
+        return redirect("tenant_loan_list")
+
+    if request.method == "POST":
+        form = LoanForm(request.POST, request.FILES, instance=loan)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Loan updated successfully.")
+            return redirect("tenant_loan_list")
+    else:
+        form = LoanForm(instance=loan)
+
+    return render(request, "expenses/tenant/loan_edit.html", {"form": form, "loan": loan})
+
+
+@login_required
+def tenant_delete_loan(request, pk):
+    tenant = get_current_tenant(request)
+    if not tenant:
+        messages.error(request, "Tenant info missing.")
+        return redirect("tenant_loan_list")
+
+    loan = get_object_or_404(Loan, pk=pk, tenant_id=tenant["tenant_id"])
+    if loan.status != "pending":
+        messages.error(request, "Only pending loans can be deleted.")
+        return redirect("tenant_loan_list")
+
+    loan.delete()
+    messages.success(request, "Loan deleted successfully.")
+    return redirect("tenant_loan_list")
+
+def select_login_type(request):
+    return render(request, 'expenses/select_login_type.html')
+
+
+from django.shortcuts import render
+
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .models import Tenant
+
+def tenant_login(request):
+    if request.method == "POST":
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+
+        # Check if tenant exists
+        tenant = Tenant.objects.filter(tenant_email=email, password=password).first()
+
+        if tenant:
+            request.session['tenant_id'] = tenant.id  # store session
+            messages.success(request, f"Welcome, {tenant.tenant_name}!")
+            return redirect('tenant_rent')  # <-- Redirect to tenant rent page
+
+        messages.error(request, "Invalid email or password. Please try again.")
+        return redirect('tenant_login')
+
+    return render(request, 'expenses/tenant/tenant_login.html')
+
+
+
+from django.shortcuts import render, redirect
+from .models import Tenant
+from django.contrib import messages
+
+def tenant_signup(request):
+    if request.method == "POST":
+        name = request.POST.get('name')
+        phone = request.POST.get('phone')
+        email = request.POST.get('email')
+        property_name = request.POST.get('property_name')
+        room_number = request.POST.get('room_number')
+        password = request.POST.get('password')
+
+        # Save tenant data
+        Tenant.objects.create(
+            tenant_name=name,
+            tenant_phone=phone,
+            tenant_email=email,
+            property_name=property_name,
+            room_number=room_number,
+            password=password  # (Later we hash it)
+        )
+
+        messages.success(request, "Account created successfully. Please login.")
+        return redirect('tenant_login')
+
+    return render(request, 'expenses/tenant/tenant_signup.html')

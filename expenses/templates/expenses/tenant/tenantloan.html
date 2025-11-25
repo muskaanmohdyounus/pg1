@@ -1,0 +1,179 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tenant | Loans</title>
+
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="{% static 'expenses/css/tenantloan.css' %}">
+</head>
+<body>
+
+  {% include 'expenses/tenant/tenant_sidebar.html' %}
+
+  <div class="main">
+
+    <!-- Header -->
+    <div class="header d-flex align-items-center justify-content-between">
+      <div>
+        <h1>Tenant Loan Applications</h1>
+        <p class="muted">Apply and view the status of your loan requests</p>
+      </div>
+
+      <div class="d-flex gap-2 align-items-center">
+        <button id="openFilter" class="btn btn-outline-danger">
+          <i class="fas fa-filter"></i> Filter
+        </button>
+
+        <a href="{% url 'tenant_apply_loan' %}" class="btn btn-primary">
+          <i class="fas fa-plus-circle"></i> Apply for Loan
+        </a>
+      </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="summary-cards">
+      <div class="card">
+        <h4>Total Approved</h4>
+        <p>₹{{ total_taken|default:0 }}</p>
+      </div>
+
+      <div class="card">
+        <h4>Total Pending</h4>
+        <p class="text-danger">₹{{ total_pending|default:0 }}</p>
+      </div>
+
+      <div class="card">
+        <h4>EMI This Month</h4>
+        <p>₹{{ emi_this_month|default:0 }}</p>
+      </div>
+
+      <div class="card">
+        <h4>Last Application</h4>
+        <p>
+          {% if last_loan %}
+            ₹{{ last_loan.loan_amount_requested }} — <span class="status-badge">{{ last_loan.get_status_display }}</span>
+          {% else %}
+            –
+          {% endif %}
+        </p>
+      </div>
+    </div>
+
+    <!-- Filter Sidebar -->
+    <div id="filterSidebar" class="filter-sidebar">
+      <div class="filter-header d-flex justify-content-between align-items-center">
+        <h4>Filter Loan Records</h4>
+        <button id="closeFilter" class="btn btn-sm btn-danger"><i class="fa fa-times"></i></button>
+      </div>
+
+      <form method="GET" action="">
+        <div class="mb-3">
+          <label>Status</label>
+          <select name="status" class="form-control">
+            <option value="">All</option>
+            <option value="pending">Pending</option>
+            <option value="approved">Approved</option>
+            <option value="rejected">Rejected</option>
+            <option value="disbursed">Disbursed</option>
+            <option value="completed">Completed</option>
+          </select>
+        </div>
+
+        <div class="mb-3">
+          <label>Loan Type</label>
+          <input type="text" name="loan_type" class="form-control">
+        </div>
+
+        <div class="mb-3">
+          <label>Year</label>
+          <input type="number" name="year" class="form-control">
+        </div>
+
+        <div class="mb-3 d-flex gap-2">
+          <input type="number" name="min_amount" class="form-control" placeholder="Min">
+          <input type="number" name="max_amount" class="form-control" placeholder="Max">
+        </div>
+
+        <button class="btn btn-danger w-100">Apply Filter</button>
+      </form>
+    </div>
+
+    <!-- Table -->
+    <div class="table-wrap mt-4">
+      <table class="loan-table table table-striped table-hover">
+        <thead class="table-danger text-white fw-bold">
+          <tr>
+            <th>Applied</th>
+            <th>Loan ID</th>
+            <th>Type / Purpose</th>
+            <th>Requested (₹)</th>
+            <th>Approved (₹)</th>
+            <th>Months</th>
+            <th>Installment (₹)</th>
+            <th>Status</th>
+            <th>Document</th>
+            <th>Admin Notes</th>
+            <th class="text-center">Actions</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for loan in loans %}
+            <tr>
+              <td>{{ loan.applied_date|date:"Y-m-d" }}</td>
+              <td>#{{ loan.pk }}{% if loan.tenant_id %} / {{ loan.tenant_id }}{% endif %}</td>
+              <td>{{ loan.loan_type|default:"—" }}<br><small class="text-muted">{{ loan.loan_purpose }}</small></td>
+              <td>₹{{ loan.loan_amount_requested }}</td>
+              <td>{% if loan.approved_amount %}₹{{ loan.approved_amount }}{% else %}—{% endif %}</td>
+              <td>{{ loan.repayment_months }}</td>
+              <td>₹{{ loan.monthly_installment|default:"0.00" }}</td>
+              <td>
+                {% if loan.status == "pending" %}
+                  <span class="badge bg-warning text-dark">Pending</span>
+                {% elif loan.status == "approved" %}
+                  <span class="badge bg-success">Approved</span>
+                {% elif loan.status == "rejected" %}
+                  <span class="badge bg-danger">Rejected</span>
+                {% elif loan.status == "disbursed" %}
+                  <span class="badge bg-primary">Disbursed</span>
+                {% elif loan.status == "completed" %}
+                  <span class="badge bg-secondary">Completed</span>
+                {% endif %}
+              </td>
+              <td>
+                {% if loan.document %}
+                  <a class="btn btn-sm btn-success" href="{{ loan.document.url }}" target="_blank">
+                    <i class="fa fa-download"></i> View
+                  </a>
+                {% else %}
+                  —
+                {% endif %}
+              </td>
+              <td class="small">{{ loan.admin_notes|default:"—" }}</td>
+              <td class="text-center">
+                {% if loan.status == "pending" %}
+                  <a href="{% url 'tenant_edit_loan' loan.pk %}" class="btn btn-sm btn-outline-primary me-1"><i class="fa fa-edit"></i></a>
+                  <a href="{% url 'tenant_delete_loan' loan.pk %}" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this pending application?');"><i class="fa fa-trash"></i></a>
+                {% else %}
+                  <button class="btn btn-sm btn-outline-secondary" disabled><i class="fa fa-lock"></i></button>
+                {% endif %}
+              </td>
+            </tr>
+          {% empty %}
+            <tr>
+              <td colspan="11" class="text-center text-muted">No loan records found.</td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <script src="{% static 'expenses/js/tenantloan.js' %}"></script>
+</body>
+</html>

@@ -1,0 +1,45 @@
+{% load static %}
+
+<!-- Mobile Menu -->
+<button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+
+<div class="mobile-menu" id="mobileMenu">
+    <a href="{% url 'index' %}"><i class="fas fa-home"></i> Dashboard</a>
+    <a href="{% url 'tenant_rent' %}"><i class="fas fa-rupee-sign"></i> Rent Payment</a>
+    <a href="{% url 'tenant_loan_list' %}"><i class="fas fa-hand-holding-usd"></i> Loan</a>
+    <a href="#"><i class="fas fa-users"></i> Community</a>
+</div>
+
+<!-- Sidebar -->
+<div class="sidebar" id="sidebar">
+    <div class="logo-box">
+        <img src="{% static 'expenses/images/logo.jpeg' %}" class="logo-img">
+        <h2 class="logo-text">Tenant<br>Portal</h2>
+    </div>
+
+    <!-- Sidebar Links -->
+    <a href="{% url 'index' %}"><i class="fas fa-home"></i> Dashboard</a>
+    <a href="{% url 'tenant_rent' %}"><i class="fas fa-rupee-sign"></i> Rent Payment</a>
+    <a href="{% url 'tenant_loan_list' %}"><i class="fas fa-hand-holding-usd"></i> Loan</a>
+    <a href="#"><i class="fas fa-users"></i> Community</a>
+
+    {% if user.is_authenticated %}
+    <form method="POST" action="{% url 'logout' %}" class="logout-form">
+        {% csrf_token %}
+        <button class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+    </form>
+    {% endif %}
+</div>
+
+<!-- CSS -->
+<link rel="stylesheet" href="{% static 'expenses/css/tenants_sidebar.css' %}">
+<link rel="stylesheet" href="{% static 'expenses/css/tenant_rent.css' %}">
+
+<!-- Optional JS for Sidebar Toggle -->
+<script>
+function toggleSidebar() {
+    const mobileMenu = document.getElementById("mobileMenu");
+    mobileMenu.classList.toggle("show");
+}
+</script>
+

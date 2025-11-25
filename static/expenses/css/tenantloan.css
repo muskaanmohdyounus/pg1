@@ -1,0 +1,457 @@
+/* ==== FORM CARD ==== */
+.card {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e3e6ea;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.05);
+  max-width: 650px;
+  margin: auto;
+}
+
+/* ==== HEADERS ==== */
+.header h2 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 5px;
+}
+
+.header p {
+  color: #6b7280;
+  font-size: 14px;
+}
+
+/* ==== FORM ELEMENTS ==== */
+form label {
+  font-weight: 600;
+  margin-bottom: 6px;
+  display: block;
+  color: #374151;
+}
+
+form input, 
+form select, 
+form textarea {
+  width: 100%;
+  padding: 10px 13px;
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  font-size: 15px;
+  transition: 0.2s ease;
+  background: #f9fafb;
+}
+
+/* Focus effect */
+form input:focus, 
+form select:focus, 
+form textarea:focus {
+  border-color: #2563eb;
+  outline: none;
+  background: #ffffff;
+  box-shadow: 0 0 4px rgba(37,99,235,0.3);
+}
+
+/* ==== BUTTONS ==== */
+button.btn-primary {
+  background: #2563eb;
+  border: none;
+  padding: 10px 22px;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: 0.3s;
+}
+
+button.btn-primary:hover {
+  background: #1e40af;
+}
+
+.btn-link {
+  font-size: 15px;
+  text-decoration: none;
+  color: #6b7280;
+  margin-left: 10px;
+}
+
+.btn-link:hover {
+  color: #111827;
+  text-decoration: underline;
+}
+
+/* Add spacing between fields */
+.mb-3 {
+  margin-bottom: 18px !important;
+}
+
+/* Page Layout */
+.main {
+  padding: 20px;
+}
+
+@media (max-width: 768px) {
+  .card {
+    width: 95%;
+    margin-top: 10px;
+  }
+}
+
+/* ---------------- MOBILE RESPONSIVENESS ---------------- */
+
+@media (max-width: 992px) {
+  .main {
+    margin-left: 80px;
+  }
+}
+
+@media (max-width: 768px) {
+
+  .main {
+    margin-left: 0;
+    padding: 15px;
+  }
+
+  /* Summary cards stack */
+  .summary-cards {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Make header stack */
+  .header {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .header button,
+  .header a {
+    width: 100%;
+  }
+
+  /* Table responsiveness */
+  .table-responsive,
+  .table-wrap {
+    overflow-x: auto;
+    width: 100%;
+  }
+
+  table {
+    min-width: 600px;
+  }
+
+  /* Filter Sidebar full width on mobile */
+  .filter-sidebar {
+    width: 100% !important;
+  }
+}
+
+@media (max-width: 480px) {
+  .header h1 {
+    font-size: 22px;
+  }
+
+  table td,
+  table th {
+    font-size: 12px;
+  }
+
+  .btn, button {
+    font-size: 13px;
+    padding: 8px 12px;
+  }
+}
+
+/* ============================= */
+/* 📌 PROFESSIONAL RESPONSIVE FIX */
+/* ============================= */
+
+@media (max-width: 768px) {
+
+  /* Center the card layout nicely */
+  .main {
+    margin-left: 0;
+    padding: 18px;
+  }
+
+  .card {
+    width: 100%;
+    margin: 0 auto;
+    border-radius: 14px;
+    padding: 12px;
+  }
+
+  /* Header becomes neat and centered */
+  .header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 6px;
+    width: 100%;
+  }
+
+  .header h2 {
+    font-size: 20px;
+  }
+
+  .header p {
+    font-size: 13px;
+    color: #7b7b7b;
+  }
+
+  /* Inputs slightly larger for mobile UX */
+  form input, 
+  form select, 
+  form textarea {
+    font-size: 14px;
+    padding: 12px;
+  }
+
+  /* Buttons full width for mobile accessibility */
+  button.btn-primary {
+    width: 100%;
+    font-size: 14px;
+    padding: 12px;
+  }
+
+  .btn-link {
+    display: block;
+    text-align: center;
+    width: 100%;
+    margin-top: 6px;
+  }
+
+  /* Improve spacing between fields */
+  .mb-3 {
+    margin-bottom: 20px !important;
+  }
+}
+
+/* Very Small Screens (Phones 480px & below) */
+@media (max-width: 480px) {
+    
+  .header h2 {
+    font-size: 18px;
+  }
+
+  form input, form select, form textarea {
+    font-size: 13px;
+  }
+
+  button.btn-primary {
+    font-size: 13px;
+  }
+
+  .card {
+    padding: 10px;
+  }
+}
+/* ============================= */
+/* 📌 FIX: FILTER SIDEBAR OVERLAP */
+/* ============================= */
+
+/* Smooth transition for content when filter opens */
+.main, .table-wrap, .header {
+  transition: margin-right 0.3s ease;
+}
+
+/* When filter is open, shift main content slightly so it doesn't hide */
+.filter-sidebar.active ~ .main {
+  margin-right: 360px;
+}
+
+/* ========= MOBILE FIX ========= */
+@media (max-width: 768px) {
+
+  /* On mobile, content becomes full width and shifts safely */
+  .filter-sidebar {
+    width: 100% !important;
+    right: -100%;
+  }
+
+  .filter-sidebar.active {
+    right: 0;
+  }
+
+  /* When filter opens on mobile, content dims slightly and scroll locks */
+  .filter-sidebar.active ~ .main {
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  /* Table scrolls properly and doesn't break layout */
+  .table-wrap {
+    overflow-x: auto;
+    width: 100%;
+    display: block;
+  }
+
+  .rent-table {
+    min-width: 700px;
+  }
+}
+
+/* Small device refinement */
+@media (max-width: 480px) {
+  .filter-sidebar {
+    padding: 18px;
+  }
+
+  .filter-sidebar.active ~ .main {
+    opacity: 0.3;
+  }
+}
+
+/* ============================= */
+/* 📌 FIX: FILTER SIDEBAR OVERLAP */
+/* ============================= */
+
+/* Smooth transition for content when filter opens */
+.main, .table-wrap, .header {
+  transition: margin-right 0.3s ease;
+}
+
+/* When filter is open, shift main content slightly so it doesn't hide */
+.filter-sidebar.active ~ .main {
+  margin-right: 360px;
+}
+
+/* ========= MOBILE FIX ========= */
+@media (max-width: 768px) {
+
+  /* On mobile, content becomes full width and shifts safely */
+  .filter-sidebar {
+    width: 100% !important;
+    right: -100%;
+  }
+
+  .filter-sidebar.active {
+    right: 0;
+  }
+
+  /* When filter opens on mobile, content dims slightly and scroll locks */
+  .filter-sidebar.active ~ .main {
+    opacity: 0.4;
+    pointer-events: none;
+  }
+
+  /* Table scrolls properly and doesn't break layout */
+  .table-wrap {
+    overflow-x: auto;
+    width: 100%;
+    display: block;
+  }
+
+  .rent-table {
+    min-width: 700px;
+  }
+}
+
+/* Small device refinement */
+@media (max-width: 480px) {
+  .filter-sidebar {
+    padding: 18px;
+  }
+
+  body.filter-open .main {
+  margin-right: 360px;
+}
+
+}
+/* FINAL HEADER FIX */
+@media (max-width: 768px) {
+  .header {
+    flex-direction: row;
+    justify-content: center;
+    text-align: center;
+    gap: 6px;
+  }
+
+  .header h2 {
+    font-size: 20px;
+    width: 100%;
+  }
+}
+/* ============================= */
+/* 📌 FIX: FILTER SIDEBAR DEFAULT STATE */
+/* ============================= */
+
+/* Default hidden (desktop + mobile) */
+.filter-sidebar {
+  position: fixed;
+  top: 0;
+  right: -360px; /* <-- THIS LINE FIXES YOUR ISSUE */
+  width: 360px;
+  height: 100%;
+  background: #ffffff;
+  border-left: 1px solid #e5e7eb;
+  transition: 0.3s ease;
+  z-index: 2000;
+}
+
+/* When active, show it */
+.filter-sidebar.active {
+  right: 0;
+}
+
+/* Content shift only on desktop */
+@media (min-width: 769px) {
+  .filter-sidebar.active ~ .main {
+    margin-right: 360px;
+  }
+}
+
+/* ========= MOBILE FIX ========= */
+@media (max-width: 768px) {
+
+  .filter-sidebar {
+    width: 100%;
+    right: -100%; /* fully hidden */
+  }
+
+  .filter-sidebar.active {
+    right: 0;
+  }
+
+  /* Dim background and lock clicking */
+  .filter-sidebar.active ~ .main {
+    opacity: 0.4;
+    pointer-events: none;
+  }
+}
+/* FORCE FILTER TO STAY HIDDEN BY DEFAULT ON ALL SCREENS */
+.filter-sidebar {
+  right: -360px !important;
+  transition: 0.3s ease;
+}
+
+.filter-sidebar.active {
+  right: 0 !important;
+}
+/* ——— FINAL FORCE FIX ——— */
+
+#filterSidebar {
+  position: fixed !important;
+  right: -100% !important;  /* fully hidden */
+  top: 0;
+  height: 100%;
+  transition: 0.35s ease !important;
+  z-index: 9999 !important;
+}
+
+/* When opened */
+#filterSidebar.active {
+  right: 0 !important;
+}
+
+/* Force correct dark red table header color */
+thead.table-danger,
+.table-danger > thead > tr > th {
+    background-color: #bb2124 !important;
+    color: white !important;
+}
+/* FORCE DARK RED HEADER */
+table.loan-table thead.table-danger th {
+    background-color: #bb2124 !important;
+    color: #ffffff !important;
+}
