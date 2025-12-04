@@ -1,0 +1,114 @@
+/* ------------------ General Page ------------------ */
+body {
+    background-color: #f4f6fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
+}
+
+.main-content {
+    margin-left: 90px; /* sidebar width */
+    padding-top: 20px;
+}
+
+/* ------------------ Card Styles ------------------ */
+.card {
+    border-radius: 12px !important;
+    border: none !important;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08) !important;
+    background-color: #fff !important;
+}
+
+.card-body {
+    padding: 2rem !important;
+}
+
+/* ------------------ Headings ------------------ */
+h3 {
+    color: #3b5bdb;
+}
+
+/* ------------------ Form Labels ------------------ */
+.form-label {
+    font-weight: 600;
+    margin-bottom: 5px;
+}
+
+/* ------------------ Inputs, Selects, Textareas ------------------ */
+input.form-control,
+input[type="text"],
+input[type="number"],
+textarea.form-control,
+select.form-select {
+    border-radius: 8px !important;
+    padding: 10px 12px !important;
+    border: 1px solid #ced4da !important;
+    transition: all 0.3s ease !important;
+    font-size: 15px;
+    width: 100% !important; /* full width */
+    display: block;
+    margin-bottom: 1rem; /* space between fields */
+}
+
+input.form-control:focus,
+textarea.form-control:focus,
+select.form-select:focus {
+    border-color: #3b5bdb !important;
+    box-shadow: 0 0 0 0.2rem rgba(59, 91, 219, 0.2) !important;
+    outline: none !important;
+}
+
+/* Readonly inputs */
+input[readonly] {
+    background-color: #e9ecef !important;
+    cursor: not-allowed !important;
+}
+
+/* Notes textarea */
+textarea.form-control {
+    min-height: 100px !important;
+    resize: vertical !important;
+}
+
+/* ------------------ Buttons ------------------ */
+.btn-primary {
+    background-color: #d32f2f !important; /* red */
+    border: none !important;
+    border-radius: 8px !important;
+    padding: 10px 25px !important;
+    transition: all 0.3s ease !important;
+    font-weight: 500;
+    display: inline-block;
+    margin-right: 10px;
+}
+
+.btn-primary:hover {
+    background-color: #b71c1c !important;
+}
+
+.btn-secondary {
+    background-color: #f0f0f0 !important;
+    color: #333 !important;
+    border: 1px solid #d1d1d1 !important;
+    border-radius: 8px !important;
+    padding: 10px 25px !important;
+    display: inline-block;
+}
+
+.btn-secondary:hover {
+    background-color: #e0e0e0 !important;
+}
+
+/* ------------------ Responsive Tweaks ------------------ */
+@media (max-width: 768px) {
+    .main-content {
+        margin-left: 0;
+        padding: 10px;
+    }
+}
+/* Force all columns in form to full width (stack vertically) */
+.row.mb-3 > .col-md-6,
+.row.mb-3 > .col-md-3 {
+    flex: 0 0 100% !important;
+    max-width: 100% !important;
+    margin-bottom: 1rem;
+}

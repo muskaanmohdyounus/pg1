@@ -9,6 +9,7 @@ from .models import Expense, OTP, ManagerProfile
 from django.contrib import messages
 from django.contrib.auth.models import User
 from .models import ManagerOnboarding
+from .models import Rent
 
 
 
@@ -528,6 +529,88 @@ def property_graph(request):
     return render(request, 'expenses/property_graph.html', context)
  
 
+from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.db.models import Sum
+from .models import Rent, Loan
+from .forms import LoanForm
+
+# ============================================================
+# TENANT RENT VIEWS
+# ============================================================
+
+def tenant_rent(request):
+    """
+    Show all rents and handle rent submission
+    """
+    if request.method == "POST":
+        Rent.objects.create(
+            tenant_name=request.POST.get("tenant_name"),
+            room_number=request.POST.get("room_number"),
+            billing_month=request.POST.get("billing_month"),
+            billing_year=request.POST.get("billing_year"),
+            billing_date=request.POST.get("billing_date"),
+            rent_cycle=request.POST.get("rent_cycle"),
+            rent_amount=request.POST.get("rent_amount"),
+            payment_method=request.POST.get("payment_method"),
+            utr_number=request.POST.get("utr_number"),
+            bill_upload=request.FILES.get("bill_upload"),
+            notes=request.POST.get("notes"),
+        )
+        messages.success(request, "Rent added successfully.")
+        return redirect("tenant_rent")
+
+    rents = Rent.objects.all().order_by("-created_at")
+    return render(request, "expenses/tenant/tenant_rent.html", {"rents": rents})
+
+from django.shortcuts import render, redirect
+from .models import Rent
+
+def add_rent(request):
+    if request.method == "POST":
+        Rent.objects.create(
+            tenant_name=request.POST.get("tenant_name"),
+            room_number=request.POST.get("room_number"),
+            billing_month=request.POST.get("billing_month"),
+            billing_year=request.POST.get("billing_year"),
+            billing_date=request.POST.get("billing_date"),
+            rent_cycle=request.POST.get("rent_cycle"),
+            rent_amount=request.POST.get("rent_amount"),
+            payment_method=request.POST.get("payment_method"),
+            utr_number=request.POST.get("utr_number"),
+            bill_upload=request.FILES.get("bill_upload"),
+            notes=request.POST.get("notes"),
+        )
+        return redirect("tenant_rent")
+
+    return render(request, "expenses/tenant/add_rent.html")
+
+def edit_rent(request, id):
+    rent = get_object_or_404(Rent, id=id)
+
+    if request.method == "POST":
+        rent.tenant_name = request.POST.get("tenant_name")
+        rent.room_number = request.POST.get("room_number")
+        rent.billing_month = request.POST.get("billing_month")
+        rent.billing_year = request.POST.get("billing_year")
+        rent.rent_amount = request.POST.get("rent_amount")
+        rent.payment_method = request.POST.get("payment_method")
+        rent.notes = request.POST.get("notes")
+        rent.save()
+        messages.success(request, "Rent updated successfully.")
+        return redirect("tenant_rent")
+
+    return render(request, "expenses/tenant/edit_rent.html", {"rent": rent})
+
+
+def delete_rent(request, id):
+    rent = get_object_or_404(Rent, id=id)
+    rent.delete()
+    messages.success(request, "Rent deleted successfully.")
+    return redirect("tenant_rent")
+
 
 # ============================================================
 # HELPER: Read tenant info from session
@@ -587,6 +670,28 @@ def get_current_tenant(request):
         "room_number": room_number,
     }
 
+# ================================
+# TENANT LOGIN
+# ================================
+def tenant_login(request):
+    if request.method == "POST":
+        email = request.POST.get('email')
+        password = request.POST.get('password')
+
+        tenant = Tenant.objects.filter(tenant_email=email, password=password).first()
+        if tenant:
+            # Store tenant info in session
+            request.session['tenant_id'] = tenant.id
+            request.session['tenant_name'] = tenant.tenant_name
+            request.session['room_number'] = tenant.room_number
+
+            messages.success(request, f"Welcome, {tenant.tenant_name}!")
+            return redirect('tenant_loan_list')  # redirect to tenant loans page
+        else:
+            messages.error(request, "Invalid email or password.")
+            return redirect('tenant_login')
+
+    return render(request, 'expenses/tenant/tenant_login.html')
 
 
 # ================================
@@ -820,21 +925,23 @@ def add_owner_tenant(request):
             form.fields['tenant_property'].queryset = Property.objects.all()
 
         if form.is_valid():
-            email = form.cleaned_data.get('email')
-            existing = OwnerTenant.objects.filter(email__iexact=email).first()
+
+            # ---- FIXED BLOCK ----
+            email = form.cleaned_data.get('email')  # your form uses 'email'
+            existing = OwnerTenant.objects.filter(email=email).first()
             if existing:
                 messages.error(request, "A tenant with this email already exists.")
                 return redirect("owner_tenant_list")
+            # ----------------------
 
             tenant = form.save(commit=False)
             tenant.status = "pending"
-            tenant.is_signup_allowed = True  # ✅ allow tenant to signup
             tenant.save()
 
             TenantKYC.objects.get_or_create(
                 tenant=tenant,
                 defaults={
-                    "full_name": tenant.name,
+                    "full_name": tenant.name,  # your model uses 'name'
                     "dob": None,
                     "id_type": "",
                     "id_number": "",
@@ -848,6 +955,7 @@ def add_owner_tenant(request):
 
             messages.success(request, f"Tenant '{tenant.name}' added. KYC Required.")
             return redirect("owner_tenant_list")
+
         else:
             messages.error(request, "Please correct the errors below.")
 
@@ -894,13 +1002,14 @@ def edit_owner_tenant(request, id):
 def delete_owner_tenant(request, id):
     tenant = get_object_or_404(OwnerTenant, id=id)
 
-    if request.method == "POST":
-        tenant_name = tenant.name
+    if request.method == 'POST':
+        tenant_name = tenant.name  # Correct field
         tenant.delete()
-        messages.success(request, f"Tenant '{tenant_name}' deleted successfully.")
+        messages.success(request, f"Tenant '{tenant_name}' deleted.")
         return redirect('owner_tenant_list')
 
     return render(request, 'expenses/delete_tenant_confirm.html', {'tenant': tenant})
+
 
 
 # ---------------------------------------------------------------------
@@ -933,29 +1042,59 @@ def my_kyc(request, tenant_id):
         'form': form
     })
 
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .models import OwnerTenant, Property
+def tenant_signup(request):
+    tenant_property_name = None
 
-# views.py
-from django.shortcuts import render, get_object_or_404, redirect
+    if request.method == "POST":
+        name = request.POST.get('name')
+        phone = request.POST.get('phone')
+        email = request.POST.get('email')
+
+        tenant = OwnerTenant.objects.filter(
+            name=name,
+            email=email,
+            phone=phone,
+            is_signup_allowed=True
+        ).first()
+
+        if not tenant:
+            messages.error(request, "Your details do not match the records. Contact the owner.")
+            return redirect("tenant_signup")
+
+        # Store tenant id and property in session
+        request.session['tenant_id'] = tenant.id
+        if tenant.tenant_property:
+            request.session['property_id'] = tenant.tenant_property.id
+            tenant_property_name = tenant.tenant_property.property_name
+
+        messages.success(request, "Details verified! Proceed to KYC.")
+        return redirect("tenant_kyc", tenant_id=tenant.id)
+
+    return render(request, 'expenses/tenant/tenant_signup.html', {
+        'tenant_property_name': tenant_property_name
+    })
+
+
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from types import SimpleNamespace
 from .models import OwnerTenant, TenantKYC
 from .forms import TenantKYCTenantForm
 
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib import messages
-from types import SimpleNamespace
-from .models import OwnerTenant, TenantKYC
-from .forms import TenantKYCTenantForm
+def tenant_kyc(request, tenant_id):
+    tenant = get_object_or_404(OwnerTenant, id=tenant_id)
 
-def tenant_kyc(request, tenant_unique_id):
-    # Fetch tenant safely by unique ID
-    tenant = get_object_or_404(OwnerTenant, tenant_unique_id=tenant_unique_id)
-
-    # Try fetching existing KYC, but do NOT auto-create
-    kyc = TenantKYC.objects.filter(tenant=tenant).first()  # None if no KYC exists
+    try:
+        kyc = tenant.kyc
+        is_update = True
+    except TenantKYC.DoesNotExist:
+        kyc = None
+        is_update = False
 
     if request.method == 'POST':
-        # Only create a new KYC on actual submission
         form = TenantKYCTenantForm(request.POST, request.FILES, instance=kyc)
         if form.is_valid():
             kyc_obj = form.save(commit=False)
@@ -963,14 +1102,13 @@ def tenant_kyc(request, tenant_unique_id):
             kyc_obj.kyc_status = 'submitted'
             kyc_obj.save()
             messages.success(request, "KYC submitted successfully.")
-            return redirect('tenant_kyc', tenant_unique_id=tenant.tenant_unique_id)
+            return redirect('tenant_kyc', tenant_id=tenant.id)
         else:
             messages.error(request, "Please correct the errors in the form.")
     else:
-        # Use empty form if no KYC exists
-        form = TenantKYCTenantForm(instance=kyc if kyc else None)
+        form = TenantKYCTenantForm(instance=kyc)
 
-    # Determine badge only if KYC exists
+    # Determine badge
     if kyc:
         if kyc.kyc_status == 'submitted':
             badge_text = "Submitted to Owner"
@@ -981,9 +1119,6 @@ def tenant_kyc(request, tenant_unique_id):
         elif kyc.kyc_status == 'rejected':
             badge_text = "Rejected"
             badge_class = "bg-danger"
-        else:
-            badge_text = "New Submission"
-            badge_class = "bg-secondary"
     else:
         badge_text = "New Submission"
         badge_class = "bg-secondary"
@@ -997,13 +1132,12 @@ def tenant_kyc(request, tenant_unique_id):
     return render(request, 'expenses/tenant_kyc.html', {
         'form': form,
         'tenant_info': tenant_info,
+        'is_update': is_update,
         'tenant': tenant,
         'badge_text': badge_text,
         'badge_class': badge_class,
         'kyc': kyc,
     })
-
-
 
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
@@ -1055,16 +1189,15 @@ def owner_tenant_list(request):
 @login_required
 def owner_review_kyc(request, tenant_id):
     tenant = get_object_or_404(OwnerTenant, id=tenant_id)
-
     try:
-        kyc = TenantKYC.objects.get(tenant=tenant)
+        kyc = tenant.kyc
     except TenantKYC.DoesNotExist:
-        messages.error(request, "KYC not submitted by this tenant.")
+        messages.error(request, "KYC not submitted by this tenant yet.")
         return redirect('owner_tenant_list')
 
     return render(request, 'expenses/owner_review_kyc.html', {
         'tenant': tenant,
-        'kyc': kyc,
+        'kyc': kyc
     })
 
 # ---------------------------------------------------------------------
@@ -1081,414 +1214,47 @@ def kyc_approval_list(request):
 # ---------------------------------------------------------------------
 # OWNER: APPROVE KYC
 # ---------------------------------------------------------------------
-# ---------------------------------------------------------------------
-# OWNER: APPROVE KYC
-# ---------------------------------------------------------------------
 @login_required
 def approve_kyc(request, tenant_id):
-    tenant = get_object_or_404(OwnerTenant, id=tenant_id)
-
+    tenant = get_object_or_404(Tenant, id=tenant_id)
     try:
         kyc = tenant.kyc
     except TenantKYC.DoesNotExist:
         messages.error(request, "No KYC found to approve.")
-        return redirect('owner_tenant_list')
+        return redirect('kyc_approval_list')
 
     if request.method == 'POST':
-        kyc.kyc_status = "verified"
+        kyc.verified = True
         kyc.save()
 
         tenant.status = 'active'
         tenant.save()
 
         messages.success(request, f"KYC for '{tenant.name}' approved.")
-        return redirect('owner_tenant_list')
+        return redirect('kyc_approval_list')
 
-    return render(request, 'expenses/approve_kyc_confirm.html', {
-        'tenant': tenant,
-        'kyc': kyc
-    })
-
+    return render(request, 'expenses/approve_kyc_confirm.html', {'tenant': tenant, 'kyc': kyc})
 
 # ---------------------------------------------------------------------
 # OWNER: REJECT KYC
 # ---------------------------------------------------------------------
 @login_required
 def reject_kyc(request, tenant_id):
-    tenant = get_object_or_404(OwnerTenant, id=tenant_id)
-
+    tenant = get_object_or_404(Tenant, id=tenant_id)
     try:
         kyc = tenant.kyc
     except TenantKYC.DoesNotExist:
         messages.error(request, "No KYC found to reject.")
-        return redirect('owner_tenant_list')
+        return redirect('kyc_approval_list')
 
     if request.method == 'POST':
-        kyc.kyc_status = "rejected"
+        kyc.verified = False
         kyc.save()
 
         tenant.status = 'rejected'
         tenant.save()
 
         messages.success(request, f"KYC for '{tenant.name}' rejected.")
-        return redirect('owner_tenant_list')
+        return redirect('kyc_approval_list')
 
-    return render(request, 'expenses/reject_kyc_confirm.html', {
-        'tenant': tenant,
-        'kyc': kyc
-    })
-
-
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from .models import OwnerTenant, Tenant, Property
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from .models import OwnerTenant, Tenant, Property
-
-def tenant_signup(request):
-    properties = Property.objects.all()
-
-    if request.method == "POST":
-        name = request.POST.get('name', '').strip()
-        phone = request.POST.get('phone', '').strip()
-        email = request.POST.get('email', '').strip().lower()
-        password = request.POST.get('password')
-        property_id = request.POST.get('property_id')
-
-        if not property_id or not property_id.isdigit():
-            messages.error(request, "Please select a valid property.")
-            return render(request, "expenses/tenant/tenant_signup.html", {"properties": properties})
-
-        property_id = int(property_id)
-
-        # ✅ Match owner record
-        owner_record = OwnerTenant.objects.filter(
-            tenant_property_id=property_id,
-            email__iexact=email,
-            phone=phone,
-            is_signup_allowed=True
-        ).first()
-
-        if not owner_record:
-            email_match = OwnerTenant.objects.filter(tenant_property_id=property_id, email__iexact=email).exists()
-            phone_match = OwnerTenant.objects.filter(tenant_property_id=property_id, phone=phone).exists()
-
-            if not email_match and not phone_match:
-                messages.error(request, "Both email and phone do not match owner records. Contact the owner.")
-            elif not email_match:
-                messages.error(request, "Email does not match owner records. Contact the owner.")
-            elif not phone_match:
-                messages.error(request, "Phone number does not match owner records. Contact the owner.")
-            else:
-                messages.error(request, "Your details do not match owner records. Contact the owner.")
-            return render(request, "expenses/tenant/tenant_signup.html", {"properties": properties})
-
-        # ✅ Prevent duplicate signup
-        if Tenant.objects.filter(tenant_email__iexact=email).exists():
-            messages.error(request, "You have already signed up. Please login.")
-            return redirect("tenant_login")
-
-        # ✅ Create tenant account
-        Tenant.objects.create(
-            tenant_name=name,
-            tenant_phone=phone,
-            tenant_email=email,
-            property_name=owner_record.tenant_property.name,
-            room_number=owner_record.room_number,
-            password=password
-        )
-
-        messages.success(request, "Signup successful! Please login.")
-        return redirect("tenant_login")
-
-    return render(request, "expenses/tenant/tenant_signup.html", {"properties": properties})
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from .models import Tenant
-
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from .models import OwnerTenant
-from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib import messages
-from .models import Tenant, OwnerTenant
-
-def tenant_login(request):
-    email_prefill = request.GET.get('email', '')
-    password_prefill = request.GET.get('password', '')
-
-    if request.method == "POST":
-        email = request.POST.get('email').strip().lower()
-        password = request.POST.get('password').strip()
-
-        tenant = Tenant.objects.filter(tenant_email__iexact=email, password=password).first()
-        if tenant:
-            request.session['tenant_id'] = tenant.id
-            request.session['tenant_name'] = tenant.tenant_name
-            request.session['room_number'] = tenant.room_number
-
-            # Map to OwnerTenant for KYC
-            owner_tenant = OwnerTenant.objects.filter(
-                email=tenant.tenant_email,
-                phone=tenant.tenant_phone
-            ).first()
-
-            if owner_tenant:
-                return redirect('tenant_kyc', tenant_unique_id=owner_tenant.tenant_unique_id)
-            else:
-                messages.error(request, "OwnerTenant record not found for this tenant.")
-                return redirect('tenant_login')
-
-        messages.error(request, "Invalid email or password.")
-        return redirect('tenant_login')
-
-    return render(request, 'expenses/tenant/tenant_login.html', {
-        "email_prefill": email_prefill,
-        "password_prefill": password_prefill
-    })
-
-
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib import messages
-from django.db.models import Q
-from .models import Property, OwnerTenant, OwnerRent  # Using your new OwnerRent model
-from django.contrib.auth.decorators import login_required
-from datetime import datetime
-
-# ---------------------------
-# Owner Rental Dashboard
-# ---------------------------
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
-from .models import Property, OwnerRent, OwnerTenant
-
-@login_required
-def owner_rental_dashboard(request):
-    properties = Property.objects.all().order_by('name')
-    selected_property_id = request.GET.get('property')
-    selected_property = None
-    tenants = []
-
-    # Fetch all rents
-    all_rents = OwnerRent.objects.select_related('tenant', 'property').order_by('-created_at')
-
-    # Filter rents by payment_status
-    pending_rents = all_rents.filter(payment_status='pending')
-    paid_rents = all_rents.filter(payment_status='paid')
-    overdue_rents = all_rents.filter(payment_status='overdue')
-
-    if selected_property_id:
-        selected_property = get_object_or_404(Property, id=selected_property_id)
-        tenants = OwnerTenant.objects.filter(tenant_property=selected_property)
-        # Filter rents by selected property
-        pending_rents = pending_rents.filter(property=selected_property)
-        paid_rents = paid_rents.filter(property=selected_property)
-        overdue_rents = overdue_rents.filter(property=selected_property)
-
-    context = {
-        'properties': properties,
-        'selected_property': selected_property,
-        'tenants': tenants,
-        'pending_rents': pending_rents,
-        'paid_rents': paid_rents,
-        'overdue_rents': overdue_rents,
-        'all_rents': all_rents,
-    }
-    return render(request, 'expenses/owner_rental_dashboard.html', context)
-
-
-# ---------------------------
-# Generate Rent for Tenants
-# ---------------------------
-from django.contrib import messages
-from .forms import OwnerRentCreateForm
-
-@login_required
-def owner_create_rent(request):
-    if request.method == 'POST':
-        form = OwnerRentCreateForm(request.POST)
-        
-        if form.is_valid():
-            try:
-                tenant = form.cleaned_data['tenant']
-
-                # Create rent entry
-                rent = OwnerRent.objects.create(
-                    tenant=tenant,
-                    property=tenant.tenant_property,  # auto-fill from tenant
-                    room_number=tenant.room_number,   # auto-fill
-                    billing_month=form.cleaned_data['billing_month'],
-                    billing_year=form.cleaned_data['billing_year'],
-                    rent_amount=form.cleaned_data['rent_amount'],
-                    room_sharing=form.cleaned_data['room_sharing'],  # if applicable
-                    payment_status='pending',  # always pending at creation
-                    due_date=form.cleaned_data['due_date']
-                )
-
-                messages.success(request, "✅ Rent created successfully. Status: Pending.")
-                return redirect('owner_rental_dashboard')  # refresh dashboard
-
-            except Exception as e:
-                messages.error(request, f"❌ Error while creating rent: {str(e)}")
-
-        else:
-            messages.error(request, "❌ Please correct the errors below.")
-
-    else:
-        form = OwnerRentCreateForm()
-
-    return render(request, 'expenses/owner_create_rent.html', {'form': form})
-
-# ---------------------------
-# Edit Rent Entry
-# ---------------------------
-@login_required
-def owner_edit_rent(request, rent_id):
-    rent = get_object_or_404(OwnerRent, id=rent_id)
-
-    if request.method == 'POST':
-        rent.billing_month = request.POST.get('billing_month')
-        rent.billing_year = int(request.POST.get('billing_year'))
-        rent.rent_amount = float(request.POST.get('rent_amount'))
-        rent.payment_method = request.POST.get('payment_method')
-        rent.notes = request.POST.get('notes', '')
-        rent.save()
-        messages.success(request, f"Rent entry updated.")
-        return redirect('owner_rental_dashboard')
-
-    context = {
-        'rent': rent,
-    }
-    return render(request, 'expenses/owner_edit_rent.html', context)
-
-
-# ---------------------------
-# Delete Rent Entry
-# ---------------------------
-@login_required
-def owner_delete_rent(request, rent_id):
-    rent = get_object_or_404(OwnerRent, id=rent_id)
-
-    if request.method == 'POST':
-        rent.delete()
-        messages.success(request, f"Rent entry deleted.")
-        return redirect('owner_rental_dashboard')
-
-    context = {
-        'rent': rent,
-    }
-    return render(request, 'expenses/owner_delete_rent_confirm.html', context)
-
-
-# ---------------------------
-# Mark Rent as Paid
-# ---------------------------
-@login_required
-def owner_mark_rent_paid(request, rent_id):
-    rent = get_object_or_404(OwnerRent, id=rent_id)
-
-    if request.method == 'POST':
-        rent.is_paid = True
-        rent.payment_date = datetime.now()
-        if request.FILES.get('bill_upload'):
-            rent.bill_upload = request.FILES.get('bill_upload')
-        rent.save()
-        messages.success(request, f"Rent marked as paid.")
-        return redirect('owner_rental_dashboard')
-
-    context = {
-        'rent': rent,
-    }
-    return render(request, 'expenses/owner_mark_rent_paid.html', context)
-
-from django.shortcuts import render, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from .models import OwnerRent
-
-@login_required
-def owner_paid_rent_detail(request, rent_id):
-    # Only allow viewing paid rents
-    rent = get_object_or_404(OwnerRent, id=rent_id, payment_status='paid')
-    return render(request, 'expenses/owner_paid_rent_detail.html', {'rent': rent})
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
-from datetime import date
-from .models import OwnerRent
-
-from django.shortcuts import render, get_object_or_404
-from django.contrib.auth.decorators import login_required
-from datetime import date
-from .models import OwnerTenant, OwnerRent
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from datetime import date, datetime
-from .models import OwnerTenant, OwnerRent
-
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
-from django.contrib import messages
-from datetime import date
-from .models import OwnerTenant, OwnerRent
-
-# -------------------------------
-# Tenant Rentals Dashboard (popup-based)
-# -------------------------------
-@login_required
-def tenant_rentals(request):
-    # tenant linked to logged-in user
-    tenant = get_object_or_404(OwnerTenant, user=request.user)
-
-    # rents
-    all_rents = OwnerRent.objects.filter(tenant=tenant).order_by('-billing_year', '-billing_month')
-    pending_rents = all_rents.filter(payment_status='pending', due_date__gte=date.today())
-    overdue_rents = all_rents.filter(payment_status='pending', due_date__lt=date.today())
-    paid_rents = all_rents.filter(payment_status='paid')
-
-    # choose a single rent to show in popup (prefer pending then overdue)
-    popup_rent = pending_rents.first() or overdue_rents.first()
-
-    context = {
-        'tenant': tenant,
-        'all_rents': all_rents,
-        'pending_rents': pending_rents,
-        'overdue_rents': overdue_rents,
-        'paid_rents': paid_rents,
-        'popup_rent': popup_rent,     # None if no pending/overdue
-    }
-    return render(request, 'expenses/tenant/tenant_rental_dashboard.html', context)
-
-
-# -------------------------------
-# Tenant Pay Rent (unchanged except using OwnerTenant lookup)
-# -------------------------------
-@login_required
-def tenant_pay_rent(request, rent_id):
-    tenant = get_object_or_404(OwnerTenant, user=request.user)
-    rent = get_object_or_404(OwnerRent, id=rent_id, tenant=tenant)
-
-    if request.method == 'POST':
-        utr_number = request.POST.get('utr_number')
-        notes = request.POST.get('notes', '')
-
-        rent.utr_number = utr_number
-        rent.notes = notes
-        rent.payment_status = 'paid'
-        rent.save()
-
-        # no notification model usage (popup flow)
-        messages.success(request, "✅ Payment successful")
-        return redirect('tenant_rental_dashboard')
-
-    return render(request, 'expenses/tenant/tenant_pay_rent.html', {'rent': rent})
-
-
-# -------------------------------
-# Tenant Paid Rent Details (unchanged)
-# -------------------------------
-@login_required
-def tenant_paid_rent_details(request, rent_id):
-    tenant = get_object_or_404(OwnerTenant, user=request.user)
-    rent = get_object_or_404(OwnerRent, id=rent_id, tenant=tenant, payment_status='paid')
-    return render(request, 'expenses/tenant/tenant_paid_rent_details.html', {'rent': rent})
+    return render(request, 'expenses/reject_kyc_confirm.html', {'tenant': tenant, 'kyc': kyc})

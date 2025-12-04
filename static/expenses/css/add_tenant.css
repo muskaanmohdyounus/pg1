@@ -1,0 +1,106 @@
+/* ============================
+   ADD TENANT PAGE CSS
+===============================*/
+
+/* Main content adjustments */
+.main-content {
+    margin-left: 90px; /* Adjust if your sidebar width is different */
+    padding: 30px 50px;
+    background-color: #f5f7fb;
+    min-height: 100vh;
+}
+
+/* HEADER */
+.main-content h3 {
+    font-size: 28px;
+    font-weight: 700;
+    color: #333;
+}
+
+.main-content a.btn-outline-secondary {
+    height: 40px;
+    display: flex;
+    align-items: center;
+}
+
+/* FORM CARD */
+.card {
+    background-color: #fff;
+    border-radius: 12px;
+    padding: 30px 25px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+/* Form labels */
+.form-label {
+    font-weight: 500;
+    color: #555;
+}
+
+/* Form inputs styling */
+input[type="text"],
+input[type="email"],
+input[type="number"],
+input[type="date"],
+select,
+textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+    border-color: #198754;
+    box-shadow: 0 0 0 2px rgba(25, 135, 84, 0.2);
+}
+
+/* Textarea styling */
+textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+/* Buttons */
+button.btn-success {
+    background-color: #198754;
+    border-color: #198754;
+    transition: all 0.3s ease;
+}
+
+button.btn-success:hover {
+    background-color: #146c43;
+    border-color: #146c43;
+}
+
+.btn-outline-secondary {
+    border-radius: 8px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .main-content {
+        margin-left: 0;
+        padding: 20px 15px;
+    }
+
+    .d-flex.justify-content-between {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+}
+/* Make sure main content is above sidebar */
+.main-content {
+    position: relative;  /* ensure it can have z-index */
+    z-index: 10;         /* higher than sidebar */
+}
+
+/* Ensure sidebar is below */
+.sidebar {
+    z-index: 5;          /* lower than main content */
+}

@@ -5,9 +5,15 @@
 <!-- Small screen menu (hidden by default) -->
 <div class="mobile-menu" id="mobileMenu">
   <a href="{% url 'expense_list' %}"><i class="fas fa-table"></i> Expenses</a>
- <a href="{% url 'property_list' %}"><i class="fas fa-building"></i> Properties</a>
+  <a href="{% url 'property_list' %}"><i class="fas fa-building"></i> Properties</a>
   <a href="{% url 'reports' %}"><i class="fas fa-chart-pie"></i> Reports</a>
   <a href="{% url 'settings' %}"><i class="fas fa-cog"></i> Settings</a>
+  <a href="{% url 'owner_tenant_list' %}"><i class="fas fa-users"></i> Tenants</a>
+  <!-- Loan Section Link -->
+  <a href="{% url 'owner_loan_list' %}"><i class="fas fa-hand-holding-usd"></i> Loans</a>
+  <!-- ✅ Rent Section Link -->
+  <a href="{% url 'owner_rental_dashboard' %}"><i class="fas fa-wallet"></i> Rentals</a>
+
   {% if user.is_authenticated %}
   <form method="POST" action="{% url 'logout' %}" class="logout-form">
     {% csrf_token %}
@@ -28,17 +34,25 @@
         <i class="fas fa-table"></i> Expenses
     </a>
 
-
     <a href="{% url 'property_list' %}">
         <i class="fas fa-building"></i> Properties
     </a>
 
-    <a href="{% url 'tenant_loan_list' %}">
-        <i class="fas fa-chart-pie"></i> Reports
+    <!-- ✅ New Tenant Section -->
+    <a href="{% url 'owner_tenant_list' %}">
+        <i class="fas fa-users"></i> Tenants
     </a>
 
-    <a href="{% url 'tenant_rent' %}">
-        <i class="fas fa-cog"></i> Settings
+    
+
+    <!-- ✅ Loan Management Section -->
+    <a href="{% url 'owner_loan_list' %}">
+        <i class="fas fa-hand-holding-usd"></i> Loans
+    </a>
+
+    <!-- ✅ Rent Section Link -->
+    <a href="{% url 'owner_rental_dashboard' %}">
+        <i class="fas fa-wallet"></i> Rentals
     </a>
 
     {% if user.is_authenticated %}
@@ -65,5 +79,3 @@ document.addEventListener('click', function(e) {
   }
 });
 </script>
-
-

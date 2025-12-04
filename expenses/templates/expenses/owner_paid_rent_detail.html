@@ -1,0 +1,54 @@
+{% load static %}
+
+<div class="container py-4">
+    <h3 class="mb-4">Payment Details</h3>
+
+    <table class="table table-bordered">
+        <tr>
+            <th>Tenant</th>
+            <td>{{ rent.tenant.name }} ({{ rent.tenant.email }})</td>
+        </tr>
+        <tr>
+            <th>Property</th>
+            <td>{{ rent.property.name }}</td>
+        </tr>
+        <tr>
+            <th>Room</th>
+            <td>{{ rent.room_number }}</td>
+        </tr>
+        <tr>
+            <th>Billing Month / Year</th>
+            <td>{{ rent.billing_month }} / {{ rent.billing_year }}</td>
+        </tr>
+        <tr>
+            <th>Amount</th>
+            <td>₹ {{ rent.rent_amount }}</td>
+        </tr>
+        <tr>
+            <th>Payment Date</th>
+            <td>{{ rent.updated_at|date:"d M Y" }}</td>
+        </tr>
+        <tr>
+            <th>Payment Mode</th>
+            <td>{{ rent.payment_method }}</td>
+        </tr>
+        <tr>
+            <th>UTR / Transaction ID</th>
+            <td>{{ rent.utr_number }}</td>
+        </tr>
+        {% if rent.bill_upload %}
+        <tr>
+            <th>Uploaded Bill / Receipt</th>
+            <td><a href="{{ rent.bill_upload.url }}" target="_blank">View File</a></td>
+        </tr>
+        {% endif %}
+        {% if rent.notes %}
+        <tr>
+            <th>Notes</th>
+            <td>{{ rent.notes }}</td>
+        </tr>
+        {% endif %}
+    </table>
+
+    <a href="{% url 'owner_rental_dashboard' %}" class="btn btn-secondary mt-3">Back to Dashboard</a>
+</div>

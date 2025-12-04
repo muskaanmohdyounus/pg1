@@ -1,0 +1,96 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Tenant Rentals</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Your tenant CSS -->
+  <link rel="stylesheet" href="{% static 'expenses/css/tenant_sidebar.css' %}">
+  <link rel="stylesheet" href="{% static 'expenses/css/tenant_rental_dashboard.css' %}">
+</head>
+<body>
+
+  <!-- include your tenant sidebar -->
+  {% include 'expenses/tenant/tenant_sidebar.html' %}
+
+  <div class="container py-4">
+    <h3 class="mb-3">Your Rentals</h3>
+
+    <!-- Optional: show count of pending -->
+    {% if pending_rents.count %}
+      <div class="alert alert-warning">
+        You have {{ pending_rents.count }} pending rent(s).
+      </div>
+    {% endif %}
+
+    <!-- Tabs (Pending / Overdue / Paid / All) -->
+    <ul class="nav nav-tabs mb-3" id="tenantRentTab" role="tablist">
+      <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#pending">Pending</button></li>
+      <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#overdue">Overdue</button></li>
+      <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#paid">Paid</button></li>
+      <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#all">All</button></li>
+    </ul>
+
+    <div class="tab-content">
+      <div class="tab-pane fade show active" id="pending">
+        {% include 'expenses/tenant/tenant_rental_table.html' with rents=pending_rents show_pay_button=True %}
+      </div>
+      <div class="tab-pane fade" id="overdue">
+        {% include 'expenses/tenant/tenant_rental_table.html' with rents=overdue_rents show_pay_button=True %}
+      </div>
+      <div class="tab-pane fade" id="paid">
+        {% include 'expenses/tenant/tenant_rental_table.html' with rents=paid_rents show_payment_details_button=True %}
+      </div>
+      <div class="tab-pane fade" id="all">
+        {% include 'expenses/tenant/tenant_rental_table.html' with rents=all_rents %}
+      </div>
+    </div>
+  </div>
+
+  <!-- ---------------- Modal for popup_rent ---------------- -->
+  {% if popup_rent %}
+  <div class="modal fade" id="pendingRentModal" tabindex="-1" aria-labelledby="pendingRentModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="pendingRentModalLabel">Pending Rent Reminder</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <p>
+            You have a pending rent of <strong>₹{{ popup_rent.rent_amount }}</strong>
+            for <strong>{{ popup_rent.billing_month }} {{ popup_rent.billing_year }}</strong>.
+            Due date: <strong>{{ popup_rent.due_date }}</strong>.
+          </p>
+          <p>Do you want to pay now?</p>
+        </div>
+        <div class="modal-footer">
+          <a href="{% url 'tenant_pay_rent' popup_rent.id %}" class="btn btn-primary">Pay Now</a>
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Later</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  {% endif %}
+
+  <!-- Bootstrap JS (bundle includes Popper) -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    // Show the modal on page load if popup_rent exists
+    document.addEventListener('DOMContentLoaded', function () {
+      {% if popup_rent %}
+        var modalEl = document.getElementById('pendingRentModal');
+        var bsModal = new bootstrap.Modal(modalEl);
+        bsModal.show();
+      {% endif %}
+    });
+  </script>
+
+</body>
+</html>

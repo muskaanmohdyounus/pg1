@@ -148,54 +148,6 @@ class ManagerOnboarding(models.Model):
 
 
 
-import uuid
-from django.db import models
-
-class Rent(models.Model):
-    # Tenant Details
-    tenant_name = models.CharField(max_length=150)
-
-    tenant_id = models.CharField(max_length=10, unique=True, editable=False)
-
-    room_number = models.CharField(max_length=20)
-
-    # Billing Information
-    billing_month = models.CharField(max_length=20)     # January, February...
-    billing_year = models.IntegerField()
-
-    billing_date = models.DateField()                   # Date they paid
-
-    rent_cycle = models.CharField(max_length=50)        # Salary calendar
-
-    rent_amount = models.DecimalField(max_digits=10, decimal_places=2)
-
-    PAYMENT_METHODS = (
-        ("UPI", "UPI"),
-        ("Card", "Card"),
-        ("NetBanking", "NetBanking"),
-        ("Wallet", "Wallet"),
-        ("Cash", "Cash"),
-    )
-    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHODS)
-
-    # Payment Proof
-    utr_number = models.CharField(max_length=100, blank=True, null=True)
-
-    bill_upload = models.FileField(upload_to="rent_bills/", blank=True, null=True)
-
-    notes = models.TextField(blank=True, null=True)
-
-    # Auto timestamps
-    created_at = models.DateTimeField(auto_now_add=True)
-
-    # Auto generate tenant ID once
-    def save(self, *args, **kwargs):
-        if not self.tenant_id:
-            self.tenant_id = str(uuid.uuid4()).split("-")[0].upper()
-        super().save(*args, **kwargs)
-
-    def __str__(self):
-        return f"{self.tenant_name} - {self.billing_month} {self.billing_year}"
 
 
 from django.db import models
@@ -278,3 +230,140 @@ class Tenant(models.Model):
 
     def __str__(self):
         return self.tenant_name
+
+class OwnerTenant(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending Activation'),
+        ('active', 'Active'),
+        ('suspended', 'Suspended'),
+    ]
+
+    tenant_property = models.ForeignKey(
+        'Property', 
+        on_delete=models.CASCADE, 
+        related_name='owner_tenants',
+        verbose_name='Property'
+    )
+    tenant_unique_id = models.CharField(max_length=20, unique=True, editable=False)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, blank=True, null=True)
+    name = models.CharField(max_length=255)
+    email = models.EmailField(unique=True)
+    phone = models.CharField(max_length=15)
+    guardian_name = models.CharField(max_length=255, blank=True, null=True)
+    guardian_phone = models.CharField(max_length=15, blank=True, null=True)
+    room_number = models.CharField(max_length=50)
+    rent_amount = models.DecimalField(max_digits=10, decimal_places=2, blank=True, null=True)
+    move_in_date = models.DateField(blank=True, null=True)
+    stay_duration_months = models.PositiveIntegerField(default=12)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    activated_at = models.DateTimeField(blank=True, null=True)
+    is_signup_allowed = models.BooleanField(default=False)
+
+
+    def save(self, *args, **kwargs):
+        if not self.tenant_unique_id:
+            last = OwnerTenant.objects.all().order_by('id').last()
+            if last:
+                last_id = int(last.tenant_unique_id.replace("TEN", ""))
+                self.tenant_unique_id = f"TEN{last_id + 1:03d}"
+            else:
+                self.tenant_unique_id = "TEN001"
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.name}"
+
+
+
+class TenantKYC(models.Model):
+    STATUS_CHOICES = [
+        ('submitted', 'Submitted'),
+        ('verified', 'Verified'),
+        ('rejected', 'Rejected'),
+    ]
+
+    tenant = models.OneToOneField(OwnerTenant, on_delete=models.CASCADE, related_name='kyc')
+    full_name = models.CharField(max_length=255)
+    dob = models.DateField(null=True, blank=True)
+    id_type = models.CharField(max_length=100)
+    id_number = models.CharField(max_length=100)
+    id_document = models.FileField(upload_to='kyc_documents/')
+    selfie = models.ImageField(upload_to='kyc_selfies/')
+    address = models.TextField()
+    permanent_address = models.TextField()
+    emergency_contact = models.CharField(max_length=50)
+    occupation = models.CharField(max_length=100)
+    kyc_status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='submitted')
+
+    def __str__(self):
+        return f"KYC - {self.tenant.name}"
+
+import uuid
+from django.db import models
+
+
+
+class OwnerRent(models.Model):
+    # Linking to existing models
+    tenant = models.ForeignKey('OwnerTenant', on_delete=models.CASCADE, related_name='rents')
+    property = models.ForeignKey('Property', on_delete=models.CASCADE, related_name='rents')
+
+    room_number = models.CharField(max_length=20)  # Auto-filled from tenant
+
+    # Room Sharing
+    ROOM_SHARING_CHOICES = (
+        ("1-sharing", "Single Sharing"),
+        ("2-sharing", "Double Sharing"),
+        ("3-sharing", "Triple Sharing"),
+    )
+    room_sharing = models.CharField(max_length=10, choices=ROOM_SHARING_CHOICES, default="1-sharing")
+
+    # Billing Information
+    billing_month = models.CharField(max_length=20)  # January, February...
+    billing_year = models.IntegerField()
+    rent_amount = models.DecimalField(max_digits=10, decimal_places=2)
+
+    # Payment
+    PAYMENT_METHODS = (
+        ("UPI", "UPI"),
+        ("Card", "Card"),
+        ("NetBanking", "NetBanking"),
+        ("Wallet", "Wallet"),
+        ("Cash", "Cash"),
+    )
+    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHODS, blank=True, null=True)
+
+    PAYMENT_STATUS = (
+        ("pending", "Pending"),
+        ("paid", "Paid"),
+        ("overdue", "Overdue"),
+    )
+    payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS, default="pending")
+
+    # Proof of payment
+    utr_number = models.CharField(max_length=100, blank=True, null=True)
+    bill_upload = models.FileField(upload_to="owner_rent_bills/", blank=True, null=True)
+
+    notes = models.TextField(blank=True, null=True)
+    due_date = models.DateField(blank=True, null=True)
+    # Auto timestamps
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    # Auto-generate unique rent ID
+    rent_id = models.CharField(max_length=10, unique=True, editable=False)
+
+    def save(self, *args, **kwargs):
+        if not self.rent_id:
+            self.rent_id = str(uuid.uuid4()).split("-")[0].upper()
+        if not self.room_number and self.tenant:
+            self.room_number = self.tenant.room_number
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.tenant.name} - {self.billing_month} {self.billing_year}"
+
+
+

@@ -79,24 +79,27 @@ WSGI_APPLICATION = 'backend.wsgi.application'
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
 import os
-import dj_database_url
 from pathlib import Path
+import dj_database_url
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 db_url = os.environ.get("DATABASE_URL")
 
-# Convert bytes to string if needed
-if isinstance(db_url, bytes):
-    db_url = db_url.decode("utf-8")
-
-if db_url and db_url.strip():
-    # ✅ Use DATABASE_URL only if it exists & is not empty
-    DATABASES = {
-        "default": dj_database_url.parse(db_url)
-    }
+if db_url:
+    # Try to use Railway Postgres if available
+    try:
+        DATABASES = {"default": dj_database_url.parse(db_url)}
+    except Exception:
+        # If it fails, fallback to SQLite
+        DATABASES = {
+            "default": {
+                "ENGINE": "django.db.backends.sqlite3",
+                "NAME": BASE_DIR / "db.sqlite3",
+            }
+        }
 else:
-    # ✅ Fallback to SQLite (no errors)
+    # SQLite fallback
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.sqlite3",
@@ -144,8 +147,12 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 STATICFILES_DIRS = [
-    BASE_DIR /"static",
+    BASE_DIR / "static",
 ]
+
+# Required for collectstatic
+STATIC_ROOT = BASE_DIR / "staticfiles"
+
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -158,3 +165,6 @@ TEMPLATES[0]['DIRS'] = [os.path.join(BASE_DIR, 'templates')]
 # ✅ Media setup
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
+
+# Tenant login page (for @login_required)
+LOGIN_URL = '/expenses/tenant/login/'

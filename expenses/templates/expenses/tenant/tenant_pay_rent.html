@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h3>Pay Rent - {{ rent.billing_month }} {{ rent.billing_year }}</h3>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="mb-3">
+        <label class="form-label">Payment Method</label>
+        <input type="text" class="form-control" value="{{ rent.payment_method|default:'-' }}" disabled>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">UTR Number / Transaction ID</label>
+        <input type="text" name="utr_number" class="form-control" required>
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Upload Bill (optional)</label>
+        <input type="file" name="bill_upload" class="form-control">
+    </div>
+    <div class="mb-3">
+        <label class="form-label">Notes</label>
+        <textarea name="notes" class="form-control">{{ rent.notes }}</textarea>
+    </div>
+    <button type="submit" class="btn btn-success">Submit Payment</button>
+    <a href="{% url 'tenant_rental_dashboard' %}" class="btn btn-secondary">Cancel</a>
+</form>
+
+{% endblock %}

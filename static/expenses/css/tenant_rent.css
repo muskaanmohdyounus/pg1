@@ -1,155 +1,110 @@
-/* page base */
-body { font-family: 'Poppins', sans-serif; background: linear-gradient(135deg,#fee2e2,#fecaca); margin:0; }
-.main { margin-left: 280px; padding: 32px; }
-
-/* header */
-.header { display:flex; justify-content:space-between; align-items:center; gap:16px; margin-bottom:18px; }
-.header h1 { margin:0; color:#7f1d1d; font-size:24px; }
-.header .muted { color:#7b7b7b; font-size:14px; margin:0; }
-
-/* add button */
-.add-rent-btn { background:#ef4444; border:none; color:#fff; padding:10px 16px; border-radius:10px; box-shadow:0 3px 10px rgba(239,68,68,0.2); }
-.add-rent-btn i{ margin-right:8px; }
-
-/* summary cards */
-.summary-cards { display:flex; gap:20px; flex-wrap:wrap; margin-bottom:18px; }
-.summary-cards .card { background:#fff; border-radius:12px; padding:18px; width:calc(25% - 15px); box-shadow:0 6px 18px rgba(0,0,0,0.06); text-align:center; }
-.summary-cards .card h4 { margin:0; color:#6b7280; font-size:14px; font-weight:600; }
-.summary-cards .card p { margin-top:8px; font-weight:700; font-size:20px; color:#111827; }
-
-/* table */
-.table-wrap { 
-  background:transparent; 
-  margin-top:8px; 
-  overflow-x: auto;      /* ⬅ makes table scrollable */
-  white-space: nowrap;   /* ⬅ prevents column wrap */
-  padding-bottom: 10px;
+/* ---------- General Styles ---------- */
+body {
+    background-color: #f4f6fc;
+    font-family: 'Inter', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: #333;
+    margin: 0;
+    padding: 0;
 }
 
-.rent-table { width:100%; border-collapse:collapse; background:#fff; border-radius:12px; overflow:hidden; box-shadow:0 6px 18px rgba(239,68,68,0.08); }
-.rent-table thead th { background:#fee2e2; color:#7f1d1d; font-weight:700; padding:12px 16px; }
-.rent-table tbody td { padding:12px 16px; vertical-align:middle; }
-
-/* actions */
-.rent-table a.btn { padding:6px 10px; border-radius:8px; font-size:13px; }
-
-/* filter sidebar */
-.filter-sidebar { position:fixed; right:-380px; top:0; width:360px; height:100%; background:#fff; box-shadow:-6px 0 30px rgba(0,0,0,0.12); padding:20px; transition:right .28s ease; z-index:1200; }
-.filter-sidebar.active { right:0; }
-.filter-header h5 { margin:0; color:#7f1d1d; }
-
-/* responsive */
-@media (max-width: 1024px){
-  .summary-cards .card{ width:calc(50% - 12px); }
-  
-  .main { 
-    margin-left: 120px; 
-    padding:22px; 
-  }
-
-  .table-wrap {
-    overflow-x: scroll;
-  }
+/* Sidebar offset */
+.main-content {
+    margin-left: 90px; /* match your sidebar width */
+    padding: 30px;
 }
 
-@media (max-width: 600px){
-  .summary-cards .card{ width:100%; }
-  
-  .main { 
-    margin-left: 0; 
-    padding:16px; 
-  }
-
-  .table-wrap { 
-    overflow-x: scroll; 
-  }
-
-  .filter-sidebar { width:100%; right:-100%; }
-  .filter-sidebar.active{ right:0; }
+/* Card Styles */
+.card {
+    border-radius: 20px;
+    border: none;
+    background: #fff;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    transition: all 0.3s ease;
 }
 
-.filter-sidebar {
-  width: 320px;
-  height: 100%;
-  position: fixed;
-  top: 0;
-  right: -340px;
-  background: #fff;
-  box-shadow: -3px 0 10px rgba(0,0,0,0.2);
-  padding: 20px;
-  transition: 0.4s ease;
-  z-index: 9999;
+.card:hover {
+    box-shadow: 0 15px 30px rgba(0,0,0,0.12);
 }
 
-.filter-sidebar.active {
-  right: 0;
+.card-body {
+    padding: 2rem 2.5rem;
 }
 
-.table-danger {
-  background-color: #8b0000 !important;   /* dark red */
+/* Form Labels */
+.form-label {
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 6px;
 }
 
-.table-danger th {
-    color: white !important;
-    font-weight: 600 !important;
+/* Form Controls */
+.form-control, select {
+    border-radius: 12px;
+    border: 1px solid #d1d3e0;
+    padding: 12px 15px;
+    transition: all 0.3s ease;
 }
 
-.rent-table thead.table-danger th {
-  background-color: #8b0000 !important;   /* dark red */
-  color: #ffffff !important;
+.form-control:focus, select:focus {
+    border-color: #4e73df;
+    box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+    outline: none;
+    background-color: #fff;
 }
 
-/* --- EXTRA FIX: prevent overlap on small screens --- */
-@media (max-width: 900px){
-  .main {
-    overflow-x: auto;
-  }
+/* Readonly inputs */
+input[readonly] {
+    background-color: #f1f3f8;
+    color: #555;
+    cursor: not-allowed;
 }
 
-/* RESET previous header padding */
-.header {
-  padding-left: 0;
+/* Buttons */
+.btn-primary {
+    background-color: #4e73df;
+    border: none;
+    border-radius: 12px;
+    padding: 10px 25px;
+    font-weight: 600;
+    box-shadow: 0 4px 8px rgba(78, 115, 223, 0.2);
+    transition: all 0.3s ease;
 }
 
-/* FIX ONLY FOR MOBILE */
-@media (max-width: 600px){
-  .header {
-    padding-left: 45px;  /* small shift so toggle doesn't cover text */
-  }
+.btn-primary:hover {
+    background-color: #2e59d9;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(46, 89, 217, 0.3);
 }
-/* --------------------------- */
-/* 📌 PROFESSIONAL MOBILE FIX  */
-/* --------------------------- */
-@media (max-width: 600px){
 
-  /* Header becomes centered and neat */
-  .header {
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    gap: 6px;
-    padding-left: 0;
-  }
+.btn-secondary {
+    border-radius: 12px;
+    padding: 10px 25px;
+    font-weight: 500;
+    border: 1px solid #d1d3e0;
+    background-color: #f8f9fc;
+    color: #5a5c69;
+    transition: all 0.3s ease;
+}
 
-  .header h1 {
-    font-size: 20px;
-  }
+.btn-secondary:hover {
+    background-color: #e2e6ea;
+    transform: translateY(-1px);
+}
 
-  .header .muted {
-    font-size: 13px;
-  }
+/* Row spacing */
+.row.mb-3 > .col-md-3, .row.mb-3 > .col-md-6 {
+    margin-bottom: 15px;
+}
 
-  /* Ensure toggle button stays visible without pushing anything */
-  .menu-toggle {
-    position: fixed;
-    left: 15px;
-    top: 12px;
-    z-index: 2000;
-    transform: translateY(0);
-  }
+/* Form header */
+h3 {
+    color: #4e73df;
+}
 
-  /* Prevent overlap with summary cards and content */
-  .main {
-    padding-top: 50px;
-  }
+/* Responsive adjustments */
+@media(max-width: 768px){
+    .main-content {
+        margin-left: 0;
+        padding: 15px;
+    }
 }

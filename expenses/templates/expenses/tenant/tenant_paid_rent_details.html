@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<h3>Paid Rent Details - {{ rent.billing_month }} {{ rent.billing_year }}</h3>
+
+<ul class="list-group">
+    <li class="list-group-item"><strong>Amount:</strong> ₹ {{ rent.rent_amount }}</li>
+    <li class="list-group-item"><strong>UTR / Transaction ID:</strong> {{ rent.utr_number }}</li>
+    <li class="list-group-item"><strong>Payment Method:</strong> {{ rent.payment_method|default:"-" }}</li>
+    <li class="list-group-item"><strong>Notes:</strong> {{ rent.notes|default:"-" }}</li>
+    <li class="list-group-item"><strong>Bill Uploaded:</strong>
+        {% if rent.bill_upload %}<a href="{{ rent.bill_upload.url }}" target="_blank">View</a>{% else %}-{% endif %}
+    </li>
+    <li class="list-group-item"><strong>Paid On:</strong> {{ rent.updated_at|date:"d M Y" }}</li>
+</ul>
+
+<a href="{% url 'tenant_rental_dashboard' %}" class="btn btn-primary mt-3">Back to Rentals</a>
+
+{% endblock %}

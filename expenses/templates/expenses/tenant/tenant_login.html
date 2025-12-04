@@ -8,12 +8,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <style>
     body {
-      font-family: 'Inter', sans-serif;
       background-color: #f8f9fa;
       height: 100vh;
       display: flex;
       align-items: center;
       justify-content: center;
+      font-family: 'Inter', sans-serif;
     }
 
     .login-card {
@@ -73,24 +73,34 @@
 </head>
 <body>
   <div class="login-card">
-    <h3><i class="bi bi-key-fill me-2"></i>Tenant Login</h3>
+    <h3>Tenant Login</h3>
     <p>Access your PG dashboard</p>
 
     {% if error %}
       <p class="error">{{ error }}</p>
     {% endif %}
 
-    <!-- IMPORTANT: Form posts to tenant login view -->
     <form method="POST" action="{% url 'tenant_login' %}">
       {% csrf_token %}
+
       <div class="mb-3">
         <label class="form-label">Email</label>
-        <input type="email" name="email" class="form-control" placeholder="Enter your registered email" required>
+        <input type="email" 
+               name="email" 
+               class="form-control" 
+               placeholder="Enter your registered email"
+               value="{{ email_prefill }}"
+               required>
       </div>
 
       <div class="mb-3">
         <label class="form-label">Password</label>
-        <input type="password" name="password" class="form-control" placeholder="Enter password" required>
+        <input type="password" 
+               name="password" 
+               class="form-control" 
+               placeholder="Enter password"
+               value="{{ password_prefill }}"
+               required>
       </div>
 
       <button type="submit" class="btn btn-danger">Login</button>

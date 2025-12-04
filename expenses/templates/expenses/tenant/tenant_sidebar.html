@@ -5,9 +5,22 @@
 
 <div class="mobile-menu" id="mobileMenu">
     <a href="{% url 'index' %}"><i class="fas fa-home"></i> Dashboard</a>
-    <a href="{% url 'tenant_rent' %}"><i class="fas fa-rupee-sign"></i> Rent Payment</a>
+
     <a href="{% url 'tenant_loan_list' %}"><i class="fas fa-hand-holding-usd"></i> Loan</a>
     <a href="#"><i class="fas fa-users"></i> Community</a>
+
+    {% if tenant %}
+        <a href="{% url 'tenant_kyc' tenant.tenant_unique_id %}">
+            <i class="fas fa-id-card"></i> KYC
+        </a>
+        <!-- New Rents/Dashboard link -->
+        <a href="{% url 'tenant_rental_dashboard' %}">
+            <i class="fas fa-rupee-sign"></i> Rents
+        </a>
+    {% else %}
+        <a href="#"><i class="fas fa-id-card"></i> KYC</a>
+        <a href="#"><i class="fas fa-rupee-sign"></i> Rents</a>
+    {% endif %}
 </div>
 
 <!-- Sidebar -->
@@ -19,9 +32,21 @@
 
     <!-- Sidebar Links -->
     <a href="{% url 'index' %}"><i class="fas fa-home"></i> Dashboard</a>
-    <a href="{% url 'tenant_rent' %}"><i class="fas fa-rupee-sign"></i> Rent Payment</a>
     <a href="{% url 'tenant_loan_list' %}"><i class="fas fa-hand-holding-usd"></i> Loan</a>
     <a href="#"><i class="fas fa-users"></i> Community</a>
+
+    {% if tenant %}
+        <a href="{% url 'tenant_kyc' tenant.tenant_unique_id %}">
+            <i class="fas fa-id-card"></i> KYC
+        </a>
+        <!-- New Rents/Dashboard link -->
+        <a href="{% url 'tenant_rental_dashboard' %}">
+            <i class="fas fa-rupee-sign"></i> Rents
+        </a>
+    {% else %}
+        <a href="#"><i class="fas fa-id-card"></i> KYC</a>
+        <a href="#"><i class="fas fa-rupee-sign"></i> Rents</a>
+    {% endif %}
 
     {% if user.is_authenticated %}
     <form method="POST" action="{% url 'logout' %}" class="logout-form">
@@ -35,11 +60,9 @@
 <link rel="stylesheet" href="{% static 'expenses/css/tenants_sidebar.css' %}">
 <link rel="stylesheet" href="{% static 'expenses/css/tenant_rent.css' %}">
 
-<!-- Optional JS for Sidebar Toggle -->
 <script>
 function toggleSidebar() {
     const mobileMenu = document.getElementById("mobileMenu");
     mobileMenu.classList.toggle("show");
 }
 </script>
-

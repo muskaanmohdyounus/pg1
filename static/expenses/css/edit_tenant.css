@@ -1,0 +1,105 @@
+/* ==== MAIN PAGE AREA ==== */
+/* MAIN CONTENT */
+.main-content {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;  /* centers horizontally */
+  align-items: center;      /* centers vertically */
+  background: #f3f4f6;
+  font-family: "Inter", sans-serif;
+  padding: 20px;
+}
+
+/* CARD STYLING */
+.edit-card {
+  background: #ffffff;
+  border-radius: 14px;
+  border: 1px solid #e5e7eb;
+  padding: 40px;
+  width: 100%;
+  max-width: 500px;
+  box-shadow: 0px 6px 16px rgba(0,0,0,0.07);
+}
+
+
+/* ==== HEADER ==== */
+.edit-card h3 {
+  font-size: 26px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 25px;
+  text-align: center;     /* Title center */
+}
+
+/* ==== FORM LABEL ==== */
+form label {
+  font-size: 15px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 6px;
+}
+
+/* ==== FORM INPUTS ==== */
+form input,
+form select {
+  width: 100%;
+  padding: 12px 14px;
+  border-radius: 8px;
+  font-size: 15px;
+  background: #f9fafb;
+  border: 1px solid #d1d5db;
+  transition: 0.25s;
+  margin-bottom: 20px;
+}
+
+form input:focus,
+form select:focus {
+  background: #ffffff;
+  border-color: #2563eb;
+  box-shadow: 0 0 6px rgba(37, 99, 235, 0.35);
+  outline: none;
+}
+
+/* ==== BUTTONS ==== */
+.btn-primary {
+  width: 100%;
+  padding: 12px;
+  font-size: 15.5px;
+  border-radius: 8px;
+  background: #2563eb;
+  border: none;
+  font-weight: 600;
+  color: white;
+  transition: 0.3s;
+}
+
+.btn-primary:hover {
+  background: #1e40af;
+}
+
+.btn-cancel {
+  display: block;
+  text-align: center;
+  margin-top: 12px;
+  color: #6b7280;
+  font-weight: 500;
+  text-decoration: none;
+}
+
+.btn-cancel:hover {
+  color: #111827;
+  text-decoration: underline;
+}
+
+/* ==== MOBILE ==== */
+@media (max-width: 768px) {
+  .main-content {
+    margin-left: 0;
+    padding: 20px;
+  }
+
+  .edit-card {
+    padding: 25px;
+    max-width: 100%;
+  }
+}

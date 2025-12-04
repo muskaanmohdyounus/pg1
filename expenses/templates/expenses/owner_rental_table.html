@@ -1,0 +1,83 @@
+<table class="table table-bordered table-hover align-middle">
+    <thead class="table-light">
+        <tr>
+            <th>Tenant</th>
+            <th>Property</th>
+            <th>Room</th>
+            <th>Month</th>
+            <th>Due Date</th>
+            <th>Amount</th>
+            <th>Status</th>
+            <th style="width: 200px;">Actions</th>
+        </tr>
+    </thead>
+
+    <tbody>
+        {% if rents %}
+            {% for rent in rents %}
+            <tr>
+                <!-- Tenant Info -->
+                <td>
+                    <strong>{{ rent.tenant.name }}</strong><br>
+                    <small>{{ rent.tenant.email }}</small>
+                </td>
+
+                <!-- Property -->
+                <td>{{ rent.property.name }}</td>
+
+                <!-- Room -->
+                <td>{{ rent.room_number }}</td>
+
+                <!-- Billing Month / Year -->
+                <td>{{ rent.billing_month }} / {{ rent.billing_year }}</td>
+
+                <!-- Due Date -->
+                <td>
+                    {% if rent.due_date %}
+                        {{ rent.due_date|date:"d M Y" }}
+                    {% else %}
+                        <span class="text-muted">N/A</span>
+                    {% endif %}
+                </td>
+
+                <!-- Rent Amount -->
+                <td>₹ {{ rent.rent_amount }}</td>
+
+                <!-- Payment Status -->
+                <td>
+                    {% if rent.payment_status == 'paid' %}
+                        <span class="badge bg-success">Paid</span>
+                    {% elif rent.payment_status == 'pending' %}
+                        <span class="badge bg-warning text-dark">Pending</span>
+                    {% else %}
+                        <span class="badge bg-danger">Overdue</span>
+                    {% endif %}
+                </td>
+
+                <!-- Actions -->
+                <td>
+                    <a href="{% url 'owner_edit_rent' rent.id %}" class="btn btn-sm btn-outline-primary">
+                        Edit
+                    </a>
+
+                    <a href="{% url 'owner_delete_rent' rent.id %}" class="btn btn-sm btn-outline-danger">
+                        Delete
+                    </a>
+
+                    {% if show_payment_details_button %}
+                        <a href="{% url 'owner_paid_rent_detail' rent.id %}" class="btn btn-sm btn-info">
+                            View Details
+                        </a>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        {% else %}
+            <tr>
+                <td colspan="8" class="text-center text-muted py-4">
+                    No rent records found.
+                </td>
+            </tr>
+        {% endif %}
+    </tbody>
+</table>

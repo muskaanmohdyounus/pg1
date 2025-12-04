@@ -152,3 +152,17 @@
     display: block;
   }
 }
+/* =========================
+   MOBILE FULL HEIGHT FIX
+========================= */
+@media (max-width: 768px) {
+    .main-content {
+        margin-left: 0 !important;      /* remove sidebar offset */
+        width: 100% !important;         /* full width */
+        min-height: 100vh !important;   /* full viewport height */
+        height: auto !important;        /* let content grow */
+        display: block;
+        padding: 12px 15px;
+        box-sizing: border-box;
+    }
+}

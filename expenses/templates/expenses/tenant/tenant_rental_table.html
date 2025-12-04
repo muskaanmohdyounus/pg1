@@ -1,0 +1,32 @@
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Month</th>
+            <th>Year</th>
+            <th>Amount</th>
+            <th>Due Date</th>
+            <th>Status</th>
+            {% if show_pay_button or show_payment_details_button %}<th>Action</th>{% endif %}
+        </tr>
+    </thead>
+    <tbody>
+        {% for rent in rents %}
+        <tr>
+            <td>{{ rent.billing_month }}</td>
+            <td>{{ rent.billing_year }}</td>
+            <td>₹ {{ rent.rent_amount }}</td>
+            <td>{{ rent.due_date }}</td>
+            <td>{{ rent.payment_status|capfirst }}</td>
+            {% if show_pay_button %}
+                <td><a href="{% url 'tenant_pay_rent' rent.id %}" class="btn btn-sm btn-primary">Pay Now</a></td>
+            {% elif show_payment_details_button %}
+                <td><a href="{% url 'tenant_paid_rent_details' rent.id %}" class="btn btn-sm btn-info">View Details</a></td>
+            {% endif %}
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="6" class="text-center">No records found.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
